@@ -2,7 +2,6 @@
 
 namespace XD\AttendableEvents\Extension;
 
-use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -10,12 +9,9 @@ use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
-use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\ORM\DataExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
-use XD\AttendableEvents\GridField\GridFieldConfig_AttendeesOverview;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendFields;
-use XD\AttendableEvents\GridField\GridFieldConfig_EventDateTimes;
 use XD\AttendableEvents\Models\EventAttendance;
 
 class EventPageExtension extends DataExtension
