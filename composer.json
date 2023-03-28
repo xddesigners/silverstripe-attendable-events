@@ -12,16 +12,11 @@
   ],
   "require": {
     "silverstripe/cms": "^4.0",
-    "xddesigners/silverstripe-attendable-events": "*"
-  },
-  "extra": {
-    "expose": [
-      "client/images"
-    ]
+    "xddesigners/silverstripe-events": "*"
   },
   "autoload": {
     "psr-4": {
-      "XD\\Events\\": "src"
+      "XD\\AttendableEvents\\": "src"
     }
   }
 }
