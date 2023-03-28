@@ -1,0 +1,21 @@
+---
+Name: xd_attendableevents
+---
+XD\Events\Model\EventPage:
+  extensions:
+    - XD\AttendableEvents\Extension\EventPageExtension
+XD\Events\Model\EventPageController:
+  extensions:
+    - XD\AttendableEvents\Extension\EventControllerExtension
+XD\Events\Model\EventDateTime:
+  extensions:
+    - XD\AttendableEvents\Extension\EventDateTimeExtension
+SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest:
+  extensions:
+    - XD\AttendableEvents\Extension\GridFieldDetailFormItemRequestExtension
+SilverStripe\SiteConfig\SiteConfig:
+  extensions:
+    - XD\AttendableEvents\Extensions\SiteConfigExtension
+SilverStripe\Security\Member:
+  extensions:
+    - XD\AttendableEvents\Extensions\MemberExtension
