@@ -21,21 +21,19 @@ class GridFieldConfig_EventAttendees extends GridFieldConfig_RecordEditor
     public function __construct($itemsPerPage = null)
     {
         parent::__construct($itemsPerPage);
-        $this->removeComponentsByType(GridField_ActionMenu::class);
-        $this->removeComponentsByType(GridFieldAddNewButton::class);
-
         $this->addComponent(new ExcelGridFieldExportButton('buttons-before-left'));
         $this->addComponent($managed = new BulkManager());
+        $this->removeComponentsByType( GridField_ActionMenu::class);
         $managed->addBulkAction(MoveAttendeesHandler::class);
         $managed->removeBulkAction(UnlinkHandler::class);
         $managed->removeBulkAction(EditHandler::class);
+        $editButton = $this->getComponentByType(GridFieldEditButton::class);
+        $editButton->removeExtraClass('grid-field__icon-action--hidden-on-hover');
 
-        if ($editButton = $this->getComponentByType(GridFieldEditButton::class)) {
-            $editButton->removeExtraClass('grid-field__icon-action--hidden-on-hover');
-        }
-
-        if ($detailForm = $this->getComponentByType(GridFieldDetailForm::class)) {
-            $detailForm->setItemRequestClass(GridFieldEventAttendanceDetailForm_ItemRequest::class);
-        }
+        $detailForm = $this->getComponentByType(GridFieldDetailForm::class);
+        $detailForm->setItemRequestClass(GridFieldEventAttendanceDetailForm_ItemRequest::class);
     }
+
+
+
 }

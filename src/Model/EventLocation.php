@@ -1,6 +1,6 @@
 <?php
 
-namespace XD\AttendableEvents\Models;
+namespace XD\AttendableEvents\Model;
 
 use SilverStripe\Forms\Tab;
 use SilverStripe\ORM\DataObject;

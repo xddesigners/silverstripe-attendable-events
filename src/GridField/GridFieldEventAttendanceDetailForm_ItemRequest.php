@@ -6,6 +6,7 @@ use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 
 class GridFieldEventAttendanceDetailForm_ItemRequest extends GridFieldDetailForm_ItemRequest
 {
+
     public function doSave($data, $form)
     {
         $result = parent::doSave($data, $form);
@@ -22,5 +23,8 @@ class GridFieldEventAttendanceDetailForm_ItemRequest extends GridFieldDetailForm
         }
 
         return $result;
+
     }
+
+
 }

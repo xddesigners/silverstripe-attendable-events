@@ -17,6 +17,8 @@ class SiteConfigExtension extends DataExtension
     private static $db = [
         'EventWaitingListConfirmationEmailContent' => 'HTMLText',
         'EventConfirmationEmailContent' => 'HTMLText',
+        'EventIntakeEmailContent' => 'HTMLText',
+        'EventEvaluationEmailContent' => 'HTMLText',
     ];
 
     public function updateCMSFields(FieldList $fields)
@@ -37,6 +39,20 @@ class SiteConfigExtension extends DataExtension
                 ->setRows(4)
                 ->addExtraClass('stacked')
                 ->setDescription(_t(__CLASS__ . '.EventConfirmationEmailContentDescription', 'This email is sent when a member is added to the confirmed list')),
+            HTMLEditorField::create(
+                'EventIntakeEmailContent',
+                _t(__CLASS__ . '.EventIntakeEmailContent', 'Event intake mail')
+            )
+                ->setRows(4)
+                ->addExtraClass('stacked')
+                ->setDescription(_t(__CLASS__ . '.EventIntakeEmailContentDescription', 'This email is sent automatically after filling out the attendee form, if an attendee form is selected on the event.')),
+            HTMLEditorField::create(
+                'EventEvaluationEmailContent',
+                _t(__CLASS__ . '.EventEvaluationEmailContent', 'Event evaluation mail')
+            )
+                ->setRows(4)
+                ->addExtraClass('stacked')
+                ->setDescription(_t(__CLASS__ . '.EventEvaluationEmailContentDescription', 'This email can be sent to all attendees after the event, if an evaluation form is selected on the event.')),
         ]);
         
         return $fields;

@@ -11,18 +11,24 @@ use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\FieldList;
+use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
+use XD\AttendableEvents\GridField\GridFieldEventAttendanceDetailForm_ItemRequest;
 use XD\AttendableEvents\Model\EventHost;
-use XD\AttendableEvents\Models\EventAttendance;
+use XD\AttendableEvents\Model\EventAttendance;
 use XD\AttendableEvents\GridField\GridFieldConfig_EventAttendees;
-use XD\AttendableEvents\Models\EventLocation;
+use XD\AttendableEvents\Model\EventDayDateTime;
+use XD\AttendableEvents\Model\EventLocation;
 use XD\Basic\GridField\GridFieldConfig_Sortable;
+use XD\Basic\GridField\GridFieldConfig_SortableEditableInline;
+use XD\Events\Form\GridFieldConfig_EventDayDateTimes;
 use XD\Events\Model\EventDateTime;
 
 /**
@@ -46,29 +52,19 @@ class EventDateTimeExtension extends DataExtension
 
     private static $has_many = [
         'Attendees' => EventAttendance::class,
-        'Hosts' => EventHost::class
+        'Hosts' => EventHost::class,
+        'DayDateTimes' => EventDayDateTime::class
     ];
 
     private static $defaults = [
         'SkipWaitingList' => 1
     ];
 
-    private static $summary_fields = [
-        'StartDate' => 'Start datum',
-        'Location' => 'Locatie',
-        'DayDateTimes.Count' => 'Dagen',
-        'AutoAttendeeLimit' => 'Limiet',
-        'summaryAttendeeCount' => 'Deelnemers',
-        'summaryConfirmedAttendeeCount' => 'Bevestigd'
-    ];
-
-    public function updateSummaryFields(&$fields)
+    public function AttendeeCount()
     {
-        unset($fields['StartTime']);
-        unset($fields['EndDate']);
-        unset($fields['EndTime']);
-        unset($fields['AllDay']);
-        unset($fields['Pinned']);
+        $count = $this->owner->Attendees()->filter(['Status' => 'Confirmed'])->Count();
+        $count += $this->owner->AttendingMembers()->filter(['Status' => ['Confirmed', 'SignedUp']])->Count();
+        return $count;
     }
 
     public function getListTitle()
@@ -78,7 +74,17 @@ class EventDateTimeExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
-        $locationField = HasOneButtonField::create($this->owner, 'Location', 'LocationID', _t(__CLASS__.'.Location','Location'));
+        $fields->removeByName(['Title', 'AttendeeLimit', 'ShowAsFull', 'SkipWaitingList', 'AutoSendConfirmation', 'ExternalTicketProvider',
+            'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes']);
+
+        if ($this->owner->ID) {
+            $fields->removeByName('StartDate');
+            $daysConfig = GridFieldConfig_EventDayDateTimes::create();
+            $daysGrid = GridField::create('DayDateTimes', _t(__CLASS__ . '.DayDateTimes', 'Days'), $this->owner->DayDateTimes(), $daysConfig);
+            $fields->addFieldToTab('Root.Main', $daysGrid);
+        }
+
+        $locationField = HasOneButtonField::create($this->owner, 'Location', 'LocationID', _t(__CLASS__ . '.Location', 'Location'));
 
         $fields->addFieldsToTab('Root.Main', [
             CompositeField::create([
@@ -89,7 +95,7 @@ class EventDateTimeExtension extends DataExtension
                 ]),
                 CheckboxField::create('ShowAsFull', _t(__CLASS__ . '.ShowAsFull', 'Toon event als vol')),
                 CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place attendees directly in confirmed list'))
-                    ->setDescription(_t(__CLASS__.'.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
+                    ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
                 $locationField,
             ])->setTitle(_t(__CLASS__ . '.EventDetails', 'Event details')),
             CompositeField::create([
@@ -103,7 +109,7 @@ class EventDateTimeExtension extends DataExtension
                 'Attendees',
                 _t(__CLASS__ . '.Attendees', 'Aanmeldingen'),
                 $this->owner->Attendees()->exclude(['Status' => 'Confirmed']),
-                GridFieldConfig_EventAttendees::create()
+                GridFieldConfig_EventAttendees::create()->removeComponentsByType(GridFieldAddNewButton::class)
             )->addExtraClass('compact-grid-field'),
             LiteralField::create('attendee-seperator', '<hr>'),
             $confirmedAttendeeGrid = GridField::create(
@@ -115,7 +121,7 @@ class EventDateTimeExtension extends DataExtension
         ]);
 
         $tab = $fields->fieldByName('Root.Attendees');
-        $tab->setTitle(_t(__CLASS__.'.Attendees','Attendees'));
+        $tab->setTitle(_t(__CLASS__ . '.Attendees', 'Attendees'));
 
         if ($this->owner->ConfirmedAttendees()->exists()) {
             /** @var ExcelGridFieldExportButton $exportButton */
@@ -199,6 +205,22 @@ class EventDateTimeExtension extends DataExtension
         return !empty($sent) && min($sent);
     }
 
+    public function sendEventEvaluation()
+    {
+        $sent = [];
+        foreach ($this->owner->Attendees()->filter(['Status' => 'Confirmed', 'EvaluationEmailSent' => null]) as $attendee) {
+            /* @var EventAttendance $attendee */
+            try {
+                $sent[] = $attendee->sendEvaluationEmail() ? 1 : 0;
+            } catch (Exception $e) {
+                $sent[] = 0;
+            }
+        }
+
+        return !empty($sent) && min($sent);
+    }
+
+
     public function getUnattendLink($memberId = null)
     {
         return Controller::join_links(array_filter([
@@ -207,23 +229,40 @@ class EventDateTimeExtension extends DataExtension
             $this->owner->ID,
             $memberId
         ]));
+        // return $this->owner->Event()->Link("unattend/{$this->owner->ID}");
     }
 
+    /**
+     * @return mixed
+     * used in summary
+     */
     public function AutoAttendeeLimit()
     {
         return $this->owner->AttendeeLimit ?: $this->owner->Event()->AttendeeLimit;
     }
 
+    /**
+     * @return mixed
+     * used in summary
+     */
     public function AutoSkipWaitingList()
     {
         return $this->owner->SkipWaitingList ?: $this->owner->Event()->SkipWaitingList;
     }
 
+    /**
+     * @return mixed
+     * used in summary
+     */
     public function summaryAttendeeCount()
     {
         return $this->owner->Attendees()->Count();
     }
 
+    /**
+     * @return mixed
+     * used in summary
+     */
     public function summaryConfirmedAttendeeCount()
     {
         return $this->owner->ConfirmedAttendees()->Count();
@@ -233,6 +272,14 @@ class EventDateTimeExtension extends DataExtension
     {
         // todo retun rendered template with embedded 'unattend' action
         return $this->owner->renderWith('XD\AttendableEvents\Field\AttendableDateOption');
+    }
+
+    public function canDelete($member = null)
+    {
+        if ($this->owner->Attendees()->exists()) {
+            return false;
+        }
+        return true;
     }
 
     public function getCanAttend()
@@ -252,14 +299,7 @@ class EventDateTimeExtension extends DataExtension
         if (!$member) {
             return null;
         }
-
-        $memberIds = $member->getManagedMembersList()->column();
-        if (!empty($memberIds)) {
-
-            return $this->owner->Attendees()->filter('MemberID', $memberIds);
-        }
-
-        return null;
+        return $this->owner->Attendees()->filter('MemberID', $member->ID);
     }
 
     public function getIsOnWaitingList($member = null)
@@ -278,7 +318,7 @@ class EventDateTimeExtension extends DataExtension
 
     public function getIsAttendable()
     {
-        return $this->owner->AutoAttendeeLimit() > 0;
+        return true; // $this->owner->AutoAttendeeLimit() > 0 || ;
     }
 
     public function getIsUnlimited()
@@ -303,17 +343,92 @@ class EventDateTimeExtension extends DataExtension
         }
 
         if ($this->getIsUnlimited()) {
+            // always places available
             return true;
         }
 
         return $this->owner->AutoAttendeeLimit() > $this->owner->ConfirmedAttendees()->count();
     }
 
-    public function canDelete($member = null)
+    public function onBeforeWrite()
     {
-        if ($this->owner->Attendees()->exists()) {
-            return false;
+        parent::onBeforeWrite();
+        // force change to trigger onAfterWrite()
+        $this->owner->LastEdited = DBDatetime::now()->Rfc2822();
+        $this->owner->Title = $this->owner->StartDate;
+        if ($location = $this->owner->Location()) {
+            $this->owner->Title = $this->owner->StartDate . ' - ' . $location->Title;
         }
-        return true;
+
+        // sync date
+        $days = $this->owner->DayDateTimes();
+        if ($days->exists()) {
+            $firstDate = $days->first();
+            if ($firstDate && $firstDate->StartDate) {
+                $this->owner->StartDate = $firstDate->StartDate;
+                $this->owner->StartTime = $firstDate->StartTime;
+                $this->owner->EndTime = $firstDate->EndTime;
+            }
+        }
+
     }
+
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+        $days = $this->owner->DayDateTimes();
+        if (!$days->exists() && $this->owner->StartDate) {
+            // auto create
+            $day = new EventDayDateTime();
+            $day->EventDateTimeID = $this->owner->ID;
+            $day->StartDate = $this->owner->StartDate;
+            $day->StartTime = $this->owner->StartTime;
+            $day->EndTime = $this->owner->EndTime;
+            $day->write();
+        }
+    }
+
+    public function ICS()
+    {
+
+        $event = $this->owner->Event();
+        $fileName = $event->URLSegment . '-' . $this->owner->StartDate;
+        $start = $this->owner->StartDate . ' ' . $this->owner->StartTime;
+        $end = $this->owner->StartDate . ' ' . $this->owner->EndTime;
+
+        $lines[] = "BEGIN:VCALENDAR";
+        $lines[] = "VERSION:2.0";
+        $lines[] = "METHOD:PUBLISH";
+
+        $lines[] = "BEGIN:VEVENT";
+        $lines[] = "DTSTART:" . gmdate("Ymd\THis\Z", strtotime($start));
+        $lines[] = "DTEND:" . gmdate("Ymd\THis\Z", strtotime($end));
+        if ($event->LocationID) {
+            $lines[] = "LOCATION:" . $event->Location()->Title;
+        }
+        $lines[] = "TRANSP:OPAQUE";
+        $lines[] = "SEQUENCE:0";
+        $lines[] = "UID:";
+        $lines[] = "DTSTAMP:" . gmdate("Ymd\THis\Z");
+        $lines[] = "SUMMARY:" . $event->Title;
+        // $lines[] = "DESCRIPTION:" . $event->;
+        $lines[] = "PRIORITY:1";
+        $lines[] = "CLASS:PUBLIC";
+        $lines[] = "BEGIN:VALARM";
+        $lines[] = "TRIGGER:-PT1440M";
+        $lines[] = "ACTION:DISPLAY";
+        $lines[] = "END:VALARM";
+        $lines[] = "END:VEVENT";
+        $lines[] = "END:VCALENDAR";
+
+        $data = implode("\n", $lines);
+
+        header("Content-type:text/calendar");
+        header('Content-Disposition: attachment; filename="' . $fileName . '.ics"');
+        Header('Content-Length: ' . strlen($data));
+        Header('Connection: close');
+        echo $data;
+
+    }
+
 }

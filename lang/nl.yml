@@ -45,13 +45,13 @@ nl:
     AttendeeLimit: 'Limiet'
     Attendees: 'Deelnemers'
     Confirmed: 'Bevestigd'
-  XD\AttendableEvents\Models\EventDayDateTime:
+  XD\AttendableEvents\Model\EventDayDateTime:
     Location: 'Locatie'
     StartDate: 'Startdatum'
     StartTime: 'Starttijd'
     EndTime: 'Eindtijd'
     EndDate: 'Einddatum'
-  XD\AttendableEvents\Models\EventAttendance:
+  XD\AttendableEvents\Model\EventAttendance:
     PLURALNAME: 'Deelnemers'
     SINGULARNAME: 'Deelnemer'
     Status: 'Status'
@@ -67,7 +67,7 @@ nl:
     testEventConfirmation: 'Test event bevestiging e-mail'
     sendConfirmationEmail: 'Stuur een bevestiging naar alle deelnemers'
     sendEvaluationEmail: 'Stuur een evaluatie naar alle deelnemers'
-  XD\AttendableEvents\Models\EventLocation:
+  XD\AttendableEvents\Model\EventLocation:
     Title: 'Titel'
     Country: 'Land'
     Address: 'Adres'

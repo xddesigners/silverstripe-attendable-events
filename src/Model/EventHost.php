@@ -51,7 +51,7 @@ class EventHost extends DataObject
     {
         parent::onBeforeWrite();
         if( !trim($this->Title) ){
-            $this->Title = $this->Member()->getFullName();
+            $this->Title = $this->Member()->getName();
         }
     }
 

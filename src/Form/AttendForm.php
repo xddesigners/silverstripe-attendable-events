@@ -27,7 +27,7 @@ use XD\AttendableEvents\Extension\Attendable;
 use XD\AttendableEvents\Extension\EventControllerExtension;
 use XD\AttendableEvents\Extension\EventDateTimeExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
-use XD\AttendableEvents\Models\EventAttendance;
+use XD\AttendableEvents\Model\EventAttendance;
 use XD\Basic\Extensions\MemberExtension;
 use XD\Basic\Forms\Fields\AttendMemberDietField;
 use XD\Events\Model\EventDateTime;
@@ -105,7 +105,7 @@ class AttendForm extends Form
                      }
 
                     } else {
-                        $requiredFields->addRequiredField($field->getFieldName());
+                        $requiredFields->addRequiredField($field->getName());
                     }
                 }
             }
@@ -129,18 +129,9 @@ class AttendForm extends Form
             return new ArrayList();
         }
 
-        
-        
-        $members = $member->getManagedMembersList();
-        if ($members && $members->exists()) {
-            return $members;
-        }
-
         $members = new ArrayList([$member]);
         $this->extend('updateMembers', $members);
 
-
-        
         return $members;
     }
 
@@ -222,7 +213,7 @@ class AttendForm extends Form
                 [
                     HiddenField::create('Attendee', _t(__CLASS__ . '.Attendee', 'Deelnemer'), $member->ID),
                     HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
-                    TextField::create('LoggedInName', _t(__CLASS__ . '.LoggedInName', 'Ingelogd als'), $member->getFullName())->setDisabled(true),
+                    TextField::create('LoggedInName', _t(__CLASS__ . '.LoggedInName', 'Ingelogd als'), $member->getName())->setDisabled(true),
                 ]
             );
 

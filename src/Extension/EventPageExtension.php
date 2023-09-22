@@ -2,6 +2,7 @@
 
 namespace XD\AttendableEvents\Extension;
 
+use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\GridField\GridField;
@@ -9,10 +10,13 @@ use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
 use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\ORM\DataExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
+use XD\AttendableEvents\GridField\GridFieldConfig_AttendeesOverview;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendFields;
-use XD\AttendableEvents\Models\EventAttendance;
+use XD\AttendableEvents\GridField\GridFieldConfig_EventDateTimes;
+use XD\AttendableEvents\Model\EventAttendance;
 
 class EventPageExtension extends DataExtension
 {
@@ -23,6 +27,13 @@ class EventPageExtension extends DataExtension
         'AllowExternalAttendees' => 'Boolean',
         'EventWaitingListConfirmationEmailContent' => 'HTMLText',
         'EventConfirmationEmailContent' => 'HTMLText',
+        'EventIntakeEmailContent' => 'HTMLText',
+        'EventEvaluationEmailContent' => 'HTMLText',
+    ];
+
+    private static $has_one = [
+        'IntakeForm' => SiteTree::class,
+        'EvaluationForm' => SiteTree::class,
     ];
 
     private static $has_many = [
@@ -31,6 +42,15 @@ class EventPageExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
+
+        $fields->removeByName(['DateTimes']);
+
+        $config = new GridFieldConfig_EventDateTimes();
+
+        $dateTimeField = new GridField('DateTimes', _t(__CLASS__ . '.DateTimes', 'DateTimes'), $this->owner->DateTimes()->Sort('StartDate DESC'), $config);
+
+        $fields->addFieldToTab('Root.Date', $dateTimeField);
+
         $fields->addFieldsToTab('Root.Date', [
             NumericField::create('AttendeeLimit', _t(__CLASS__ . '.AttendeeLimit', 'Attendee limit'))
                 ->setDescription(_t(__CLASS__ . '.AttendeeLimitDescription', 'This value is used for all the dates above if they are set to value 0. Limit of 0 means unlimited.')),
@@ -51,6 +71,14 @@ class EventPageExtension extends DataExtension
                 GridFieldConfig_AttendFields::create()
             ),
             TextField::create('ExternalTicketProvider', _t(__CLASS__ . '.ExternalTicketProvider', 'External ticketprovider')),
+            TreeDropdownField::create('IntakeFormID', _t(__CLASS__ . '.IntakeForm', 'Intake form'), SiteTree::class)
+                ->setDescription(_t(__CLASS__ . '.IntakeFormDescription', 'Link to this form will be automatically sent to event attendee after subscription.')),
+            HTMLEditorField::create('EventIntakeEmailContent', _t(__CLASS__ . '.EventIntakeEmailContent', 'Intake email content'))->setRows(7)
+                ->setDescription(_t(__CLASS__ . '.EventIntakeEmailContentDescription', 'Override default settings in Settings.')),
+            TreeDropdownField::create('EvaluationFormID', _t(__CLASS__ . '.EvaluationForm', 'Evaluation form'), SiteTree::class)
+                ->setDescription(_t(__CLASS__ . '.EvaluationFormDescription', 'Link to this form can be sent to all event attendees after the event took place.')),
+            HTMLEditorField::create('EventEvaluationEmailContent', _t(__CLASS__ . '.EventEvaluationEmailContent', 'Evaluation email content'))->setRows(7)
+                ->setDescription(_t(__CLASS__ . '.EventEvaluationEmailContentDescription', 'Override default settings in Settings.')),
             HTMLEditorField::create('EventWaitingListConfirmationEmailContent', _t(__CLASS__ . '.EventWaitingListConfirmationEmailContent', 'Waiting list email content'))->setRows(7)
                 ->setDescription(_t(__CLASS__ . '.EventWaitingListConfirmationEmailContentDescription', 'Override default settings in Settings.')),
             HTMLEditorField::create('EventConfirmationEmailContent', _t(__CLASS__ . '.EventConfirmationEmailContent', 'Confirmation email content'))->setRows(7)
@@ -59,6 +87,15 @@ class EventPageExtension extends DataExtension
 
         $tab = $fields->fieldByName('Root.AttendForm');
         $tab->setTitle(_t(__CLASS__ . '.AttendForm', 'AttendForm'));
+
+        /*
+        $config = new GridFieldConfig_AttendeesOverview();
+        $fields->addFieldsToTab('Root.Attendees', [
+            GridField::create('Attendees', _t(__CLASS__ . '.Attendees', 'Attendees'), $this->owner->getAttendees(), $config)
+                ->addExtraClass('compact-grid-field')
+                ->setDescription(_t(__CLASS__ . '.AttendeesOverviewDescription', 'Note: Global list of attendees, attendees are managed per date instance.'))
+        ]);
+        */
 
         return $fields;
     }
@@ -71,4 +108,5 @@ class EventPageExtension extends DataExtension
         }
         return EventAttendance::get()->filter(['ID' => -1]);
     }
+
 }

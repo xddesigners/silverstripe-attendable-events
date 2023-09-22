@@ -1,15 +1,21 @@
 <?php
 
-namespace XD\AttendableEvents\Models;
+namespace XD\AttendableEvents\Model;
 
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\Director;
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Forms\CheckboxSetField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\ManyManyList;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\UserForms\Model\Submission\SubmittedFormField;
 use SilverStripe\View\ArrayData;
+use VGS\Members\Model\VGSMember;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\Basic\Forms\Fields\AttendMemberDietField;
 use XD\Events\Model\EventDateTime;
@@ -17,7 +23,7 @@ use XD\Events\Model\EventPage;
 
 /**
  * Class EventAttendance
- * @package XD\AttendableEvents\Models
+ * @package XD\AttendableEvents\Model
  * @method Member Member
  * @method EventDateTime EventDate
  */
@@ -55,7 +61,7 @@ class EventAttendance extends DataObject
     private static $summary_fields = [
         'Status',// => 'Status',
         'Title', // => 'Title',
-        'Organisation', // => 'Organisation',
+        'AttendeeOrganisation', // => 'Organisation',
         'EventDate.StartDate' => 'Start',
         'EventDate.Location.Title' => 'Locatie', // => 'Location',
         'EventConfirmationEmailSent', // => 'Confirmation sent',
@@ -65,12 +71,13 @@ class EventAttendance extends DataObject
 
     private static $exported_fields = [
         'Status' => 'Status',
+        'AttendeeNumber' => 'Lidnummer',
         'AttendeeName' => 'Naam',
-        'AttendeeEmail' => 'Email',
+        'AttendeeEmail' => 'Email', 
         'AttendeePhone' => 'Telefoon',
-        'Organisation' => 'Organisatie',
+        'AttendeeOrganisation' => 'Organisatie',
         'EventDate.StartDate' => 'EventDate',
-        'EventDate.Location.Title' => 'Location',
+        'EventDate.Location.Title' => 'Location',// niet gevonden
         'ExtraFields' => 'Extra velden'
     ];
 
@@ -96,7 +103,8 @@ class EventAttendance extends DataObject
         // member or outsider
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
-            $values = json_decode($attendeeField->Value, true);
+            $value = $attendeeField->Value ? $attendeeField->Value : '';
+            $values = json_decode($value, true);
             if ($values && is_array($values)) {
                 foreach($values as $key => $val) {
                     $itemField = clone $field;
@@ -108,7 +116,6 @@ class EventAttendance extends DataObject
             } else {
                 $fields->addFieldToTab('Root.Main', $field);
             }
-            
         }
 
         return $fields;
@@ -212,8 +219,8 @@ class EventAttendance extends DataObject
                 //         ]);
                 //     }
                 // }
-                foreach ($this->Fields() as $attendield) {
-                    $name = $attendield->getFieldName();
+                foreach ($this->Fields() as $attendField) {
+                    $name = $attendField->getFieldName();
                     $value = $this->{$name};
                     if (is_array($value)) {
                         $value = json_encode($value);
@@ -222,7 +229,7 @@ class EventAttendance extends DataObject
                     // fixme: cant update CheckboxSet field data here ..?
 
                     if ($this->isChanged($name)) {
-                        $this->Fields()->add($attendield, [
+                        $this->Fields()->add($attendField, [
                             'Value' => $this->{$name}
                         ]);
                     }
@@ -260,7 +267,7 @@ class EventAttendance extends DataObject
         $extraFields = [];
         $values = $fields->map('Title', 'Value')->toArray();
         foreach ($values as $title => $value) {
-            $values = json_decode($value, true);
+            $values = json_decode($value ? $value : '', true);
             if ($values && is_array($values)) {
                 foreach ($values as $key => $val) {
                     $extraFields[] = "$title: $val";        
@@ -289,7 +296,12 @@ class EventAttendance extends DataObject
     {
         $phone = $this->Phone;
         if (($member = $this->Member()) && $member->exists()) {
-            return $member->Telephone ? $member->Telephone : $member->MobilePhone;
+            if ($member instanceof VGSMember) {
+                return $member->getFunctionPhone() ?? $member->PrivatePhone;
+            }
+
+            // return $member->Telephone ? $member->Telephone : $member->MobilePhone;
+            return '-';
         }
 
         return $phone;
@@ -299,7 +311,8 @@ class EventAttendance extends DataObject
     {
         $email = $this->Email;
         if (($member = $this->Member()) && $member->exists()) {
-            return $member->hasMethod('getCurrentEmail') ? $member->getCurrentEmail() : $member->Email;
+            return $member->Email;
+            // return $member->hasMethod('getCurrentEmail') ? $member->getCurrentEmail() : $member->Email;
         }
 
         return $email;
@@ -315,17 +328,25 @@ class EventAttendance extends DataObject
         return $name;
     }
 
-    // public function getAttendeeOrganisation()
-    // {
-    //     $name = $this->Organisation;
-    //     if (($member = $this->Member()) && $member->exists()) {
-    //         if( $organisation = $member->getCurrentOrganisation() ){
-    //             return $organisation->Title;
-    //         }
-    //     }
+    public function getAttendeeNumber()
+    {
+        if (($member = $this->Member()) && $member->exists() && $member instanceof VGSMember) {
+            return $member->MembershipNumber;
+        }
 
-    //     return $name;
-    // }
+        return '-';
+    }
+
+    public function getAttendeeOrganisation()
+    {
+        if (($member = $this->Member()) && $member->exists() && $member instanceof VGSMember) {
+            if( $organisation = $member->getCurrentOrganisation() ){
+                return $organisation->Title;
+            }
+        }
+
+        return $this->Organisation;
+    }
 
     public function getTitle()
     {
@@ -336,6 +357,149 @@ class EventAttendance extends DataObject
     {
         parent::onBeforeDelete();
         $this->Fields()->removeAll();
+    }
+
+    // send when created and if IntakeForm was selected on Event
+    public function sendEvaluationEmail()
+    {
+        if (!empty($this->EvaluationEmailSent)) {
+            return false;
+        }
+
+        $event = $this->getEvent();
+        if (!$event) {
+            return false;
+        }
+
+        if (!$this->MemberID || !($member = $this->Member())) {
+            $to = $this->Email;
+        } else {
+            $to = $member->hasMethod('getCurrentEmail') ? $member->getCurrentEmail() : $member->Email;
+        }
+
+        if (!$to) {
+            return false;
+        }
+
+        $from = Email::config()->get('admin_email');
+        $email = new Email($from, $to);
+
+
+        $days = $this->EventDate()->DayDateTimes();
+        if( $days->exists() && $days->Count() > 1 ){
+            $subject = _t(__CLASS__ . '.EventEvaluationEmailSubject', 'Evaluatie van {event}', null, [
+                'event' => $this->EventDate()->Event()->Title
+            ]);
+        } else {
+            $subject = _t(__CLASS__ . '.EventEvaluationEmailSubject', 'Evaluatie van {event} op {date}', null, [
+                'date' => $this->EventDate()->dbObject('StartDate')->Format('EEEE d MMMM'),
+                'event' => $this->EventDate()->Event()->Title
+            ]);
+        }
+
+        $email->setSubject($subject);
+
+        // default body from Settings
+        $siteConfig = SiteConfig::current_site_config();
+        $body = $siteConfig->EventEvaluationEmailContent;
+
+        // override on event
+        if (!empty($event->EventIntakeEmailContent)) {
+            $body = $event->EventIntakeEmailContent;
+        }
+
+        $link = $event->EvaluationForm()->AbsoluteLink();
+
+        if (strpos($body, '[EVALUATION_FORM]') !== false) {
+            // replace
+            $body = str_replace('[EVALUATION_FORM]', '<a href="' . $link . '" target="_blank">Open formulier &raquo;</a>', $body);
+        } else {
+            // append
+            $body .= '<p><a href="' . $link . '" target="_blank">Open formulier &raquo;</a></p>';
+        }
+
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventEvaluationEmail.ss');
+        $email->setData($this);
+        $email->addData('Body', $body);
+
+        if ($email->send()) {
+            $this->EvaluationEmailSent = DBDatetime::now()->getValue();
+            $this->write();
+            return true;
+        }
+
+        return false;
+    }
+
+    // send when created and if IntakeForm was selected on Event
+    public function sendIntakeEmail()
+    {
+        if (!empty($this->IntakeEmailSent)) {
+            return false;
+        }
+
+        $event = $this->getEvent();
+        if (!$event) {
+            return false;
+        }
+
+        if (!$this->MemberID || !($member = $this->Member())) {
+            $to = $this->Email;
+        } else {
+            $to = $member->hasMethod('getCurrentEmail') ? $member->getCurrentEmail() : $member->Email;
+        }
+
+        if (!$to) {
+            return false;
+        }
+
+        $from = Email::config()->get('admin_email');
+        $email = new Email($from, $to);
+
+        $days = $this->EventDate()->DayDateTimes();
+        if( $days->exists() && $days->Count() > 1 ){
+            $subject = _t(__CLASS__ . '.EventIntakeEmailSubject', 'Vragenlijst voor {event}', null, [
+                'event' => $this->EventDate()->Event()->Title
+            ]);
+        } else {
+            $subject = _t(__CLASS__ . '.EventIntakeEmailSubject', 'Vragenlijst voor {event} op {date}', null, [
+                'date' => $this->EventDate()->dbObject('StartDate')->Format('EEEE d MMMM'),
+                'event' => $this->EventDate()->Event()->Title
+            ]);
+        }
+
+        $email->setSubject($subject);
+
+        // default body from Settings
+        $siteConfig = SiteConfig::current_site_config();
+        $body = $siteConfig->EventIntakeEmailContent;
+
+        // override on event
+        if (!empty($event->EventIntakeEmailContent)) {
+            $body = $event->EventIntakeEmailContent;
+        }
+
+        $link = $event->IntakeForm()->AbsoluteLink();
+
+        if (strpos($body, '[INTAKE_FORM]') !== false) {
+            // replace
+            $body = str_replace('[INTAKE_FORM]', '<a href="' . $link . '" target="_blank">Open formulier &raquo;</a>', $body);
+        } else {
+            // append
+            $body .= '<p><a href="' . $link . '" target="_blank">Open formulier &raquo;</a></p>';
+        }
+
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventIntakeEmail.ss');
+        $email->setData($this);
+        $email->addData('Body', $body);
+
+        if ($email->send()) {
+            $this->IntakeEmailSent = DBDatetime::now()->getValue();
+            $this->write();
+            return true;
+        }
+
+        return false;
     }
 
     // send when created

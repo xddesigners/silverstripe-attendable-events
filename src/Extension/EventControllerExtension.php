@@ -5,8 +5,11 @@ namespace XD\AttendableEvents\Extension;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Extension;
 use SilverStripe\ORM\ManyManyList;
+use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use XD\AttendableEvents\Forms\AttendForm;
+use XD\AttendableEvents\Model\EventAttendance;
 use XD\Events\Model\EventDateTime;
 use XD\Events\Model\EventPage;
 
@@ -15,6 +18,7 @@ class EventControllerExtension extends Extension
     private static $allowed_actions = [
         'AttendForm',
         'unattend',
+        'ics'
     ];
 
     public function getAttendableDates()
@@ -25,6 +29,17 @@ class EventControllerExtension extends Extension
     public function AttendForm()
     {
         return new AttendForm($this->owner);
+    }
+
+    public function ICS()
+    {
+        $params = $this->owner->getURLParams();
+        if (isset($params['ID'])) {
+            $id = (int) $params['ID'];
+            if($eventDateTime = EventDateTime::get()->byID($id)){
+                $eventDateTime->ICS();
+            }
+        }
     }
 
     public function unattend(HTTPRequest $request)

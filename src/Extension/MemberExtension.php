@@ -4,7 +4,7 @@ namespace XD\AttendableEvents\Extensions;
 
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\Member;
-use XD\AttendableEvents\Models\EventAttendance;
+use XD\AttendableEvents\Model\EventAttendance;
 
 /**
  * Class MemberExtension

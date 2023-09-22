@@ -6,7 +6,7 @@ use SilverStripe\Core\ClassInfo;
 use SilverStripe\Forms\FormField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationResult;
-use XD\AttendableEvents\Models\EventAttendance;
+use XD\AttendableEvents\Model\EventAttendance;
 use XD\Events\Model\EventPage;
 
 class AttendField extends DataObject

@@ -24,12 +24,12 @@ en:
     StartTime: 'Start time'
     EndTime: 'End time'
     Location: 'Location'
-  XD\AttendableEvents\Models\EventDayDateTime:
+  XD\AttendableEvents\Model\EventDayDateTime:
     StartDate: 'Start date'
     EndDate: 'End date'
     StartTime: 'Start time'
     EndTime: 'End time'
-  XD\AttendableEvents\Models\EventAttendance:
+  XD\AttendableEvents\Model\EventAttendance:
     Status: 'Status'
     WaitingListConfirmationEmailSent: 'Waiting list confirmation email sent'
     EventConfirmationEmailSent: 'Event confirmation email sent'
