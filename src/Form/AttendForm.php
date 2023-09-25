@@ -116,8 +116,10 @@ class AttendForm extends Form
         parent::__construct($controller, self::DEFAULT_NAME, $fields, $actions, $requiredFields);
 
         if ($event->AllowExternalAttendees && !Security::getCurrentUser() && $this->hasMethod('enableSpamProtection') )   {
-            // $this->enableSpamProtection();
+            $this->enableSpamProtection();
         }
+
+        $this->extend('updateForm');
 
     }
 
