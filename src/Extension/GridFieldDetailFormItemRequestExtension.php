@@ -5,6 +5,7 @@ namespace XD\AttendableEvents\Extension;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\Form;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
 use XD\Events\Model\EventDateTime;
@@ -15,19 +16,16 @@ use XD\Events\Model\EventDateTime;
  *
  * @property GridFieldDetailForm_ItemRequest owner
  */
-class GridFieldDetailFormItemRequestExtension extends \SilverStripe\Core\Extension
+class GridFieldDetailFormItemRequestExtension extends Extension
 {
     private static $allowed_actions = [
         'sendConfirmationEmail',
-        'sendEvaluationEmail',
         'testEventConfirmation'
     ];
 
     public function updateItemEditForm(Form $form)
     {
         if (($record = $this->owner->getRecord()) && $record instanceof EventDateTime) {
-
-            $event = $record->Event();
 
             $connectionActions = CompositeField::create()->setName('ConnectionActions');
             $connectionActions->setFieldHolderTemplate(CompositeField::class . '_holder_buttongroup');
@@ -46,75 +44,36 @@ class GridFieldDetailFormItemRequestExtension extends \SilverStripe\Core\Extensi
 
             $connectionActions->push($sendConfirmationAction);
 
-            if( $event->EvaluationFormID ) {
-                $sendEvaluationAction = FormAction::create('sendEvaluationEmail', _t(__CLASS__ . '.sendEvaluationEmail', 'Send evaluation to all attendees'))
-                    ->addExtraClass('btn btn-outline-secondary font-icon-p-mail')
-                    ->setAttribute('data-icon', 'p-mail')
-                    ->setUseButtonTag(true);
-
-                $connectionActions->push($sendEvaluationAction);
-            }
-
             $form->Actions()->insertBefore('RightGroup', $connectionActions);
         }
     }
 
     public function testEventConfirmation()
     {
-        $record = $this->owner->getRecord();
-        $controller = Controller::curr();
-        /* @var EventDateTime|EventDateTimeExtension $record */
-        if ($record->hasMethod('testEventConfirmation') && $record->testEventConfirmation()) {
-            $controller->getResponse()->addHeader(
-                'X-Status',
-                rawurlencode("Sent test confirmation")
-            );
-        } else {
-            $controller->getResponse()->addHeader(
-                'X-Status',
-                rawurlencode("Cannot send test confirmation")
-            );
-        }
+        $this->handleActionOnRecord('testEventConfirmation', 'Sent test confirmation', 'Cannot send test confirmation');
     }
 
     public function sendConfirmationEmail()
     {
-        $record = $this->owner->getRecord();
-        $controller = Controller::curr();
-        /* @var EventDateTime|EventDateTimeExtension $record */
-        if ($record->hasMethod('sendEventConfirmation') && $record->sendEventConfirmation()) {
-            $controller->getResponse()->addHeader(
-                'X-Status',
-                rawurlencode("Sent event confirmation")
-            );
-        } else {
-            $controller->getResponse()->addHeader(
-                'X-Status',
-                rawurlencode("Cannot send event confirmation")
-            );
-        }
+        $this->handleActionOnRecord('sendEventConfirmation', 'Sent event confirmation', 'Cannot send event confirmation');
     }
 
-
-    public function sendEvaluationEmail()
+    public function handleActionOnRecord($method, $successMessage, $errorMessage)
     {
         $record = $this->owner->getRecord();
         $controller = Controller::curr();
-        /* @var EventDateTime|EventDateTimeExtension $record */
-        if ($record->hasMethod('sendEventEvaluation') && $record->sendEventEvaluation()) {
+        if ($record->hasMethod($method) && $record->{$method}()) {
+            $message = $successMessage ?? _t(__CLASS__ . '.HandleActionSuccess', 'success');
             $controller->getResponse()->addHeader(
                 'X-Status',
-                rawurlencode("Sent event evaluation")
+                rawurlencode($message)
             );
         } else {
+            $message = $errorMessage ?? _t(__CLASS__ . '.HandleActionError', 'error');
             $controller->getResponse()->addHeader(
                 'X-Status',
-                rawurlencode("Cannot send event evaluation")
+                rawurlencode($message)
             );
         }
     }
-
-
-
-
 }

@@ -168,14 +168,6 @@ class AttendForm extends Form
                 $disabled[$date->ID] = $date->ID;
             }
 
-            // Select when attending
-            // todo: check who of the managed members is attending
-            $members = $this->getMembers();
-            foreach ($members as $member) {
-                if ($date->getIsAttending($member)) {
-                    $attending[$date->ID] = $date->ID;
-                }    
-            }
             if ($date->getIsAttending()) {
                 $attending[$date->ID] = $date->ID;
             }
@@ -211,14 +203,11 @@ class AttendForm extends Form
             /* @var Member|MemberExtension|\XD\Lea\Extensions\MemberExtension $member */
 
             $member = $members->first();
-            return CompositeField::create(
-                [
-                    HiddenField::create('Attendee', _t(__CLASS__ . '.Attendee', 'Deelnemer'), $member->ID),
-                    HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
-                    TextField::create('LoggedInName', _t(__CLASS__ . '.LoggedInName', 'Ingelogd als'), $member->getName())->setDisabled(true),
-                ]
-            );
-
+            return CompositeField::create([
+                HiddenField::create('Attendee', _t(__CLASS__ . '.Attendee', 'Deelnemer'), $member->ID),
+                // HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
+                // TextField::create('LoggedInName', _t(__CLASS__ . '.LoggedInName', 'Ingelogd als'), $member->getName())->setDisabled(true),
+            ]);
         }
 
         if (self::config()->get('allow_external_attendees')) {
@@ -226,11 +215,10 @@ class AttendForm extends Form
                 HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
                 LiteralField::create('AskLogin', _t(
                     __CLASS__ . '.AskLogin', 
-                    '<p>Bent u lid van de vereniging? <a href="/Security/login?BackURL={link}">Log dan eerst in.</a> <br>Niet-leden kunnen zich aanmelden via onderstaand formulier.</p>',
+                    '<p>Heeft u een account? <a href="/Security/login?BackURL={link}">Log dan eerst in.</a> <br>Zonder een account kunt u zich aanmelden via onderstaand formulier.</p>',
                     null,
                     ['link' => $controller->Link()]
                 )),
-//                LiteralField::create('MemberschipNote', _t(__CLASS__ . '.MemberschipNote', '<div class="callout">Let op: U bent als niet automatisch lid. <a href="/over-ons/vereniging/lidmaatschap/">Lees hier meer over het lidmaatschap, inschrijving en de voordelen.</a></div>')),
                 TextField::create('Name', _t(__CLASS__ . '.Name', 'Naam'))->addExtraClass('requiredField'),
                 EmailField::create('Email', _t(__CLASS__ . '.Email', 'E-mail'))->addExtraClass('requiredField'),
                 TextField::create('Phone', _t(__CLASS__ . '.Phone', 'Telefoon'))->addExtraClass('requiredField'),
@@ -295,9 +283,9 @@ class AttendForm extends Form
             // subscription on external website
             return LiteralField::create(
                 'external',
-                "<a href='$externalTicketProvider' class='action button primary' target='_blank'>
+                "<a href='$externalTicketProvider' class='action icon-link btn btn-secondary' target='_blank'>
                     <span>$label</span>
-                    <i class='fas fa-external-link-alt'></i>
+                    <i class='bi fas fa-external-link-alt'></i>
                 </a>"
             );
         } elseif ($eventExpired) {
@@ -305,42 +293,24 @@ class AttendForm extends Form
             return FormAction::create('expired', $label)
                 ->setUseButtonTag(true)
                 ->setAttribute('title', $label)
-                ->setButtonContent("<span>$label</span> <i class='fas fa-calendar-times'></i>")
+                ->setButtonContent("<span>$label</span> <i class='bi fas fa-calendar-times'></i>")
                 ->setDisabled(true)
-                ->addExtraClass('button warning');
-            // todo unattend action in date select
-            // } elseif ($currentUser && $event->getIsAttending()) {
-            //     $attending = _t(__CLASS__ . '.Attending', 'Ingeschreven');
-            //     $unattend = _t(__CLASS__ . '.Unattend', 'Uitschrijven');
-            //     return FormAction::create('unattend', $unattend)
-            //         ->setUseButtonTag(true)
-            //         ->setAttribute('title', $unattend)
-            //         ->setButtonContent("
-            //             <div class='button__states'>
-            //                 <div class='button__state button__state--default'>
-            //                     <span>$attending</span><i class='fas fa-check'></i>
-            //                 </div>
-            //                 <div class='button__state button__state--hover'>
-            //                     <span>$unattend</span><i class='fas fa-times'></i>
-            //                 </div>
-            //             </div>
-            //         ")
-            //         ->addExtraClass('button success small button--has-hover-state');
+                ->addExtraClass('icon-link btn btn-warning');
         } elseif (!$placesAvailable) {
             $label = _t(__CLASS__ . '.Full', 'Vol');
             return FormAction::create('full', $label)
                 ->setUseButtonTag(true)
                 ->setAttribute('title', $label)
-                ->setButtonContent("<span>$label</span> <i class='fas fa-times'></i>")
+                ->setButtonContent("<span>$label</span> <i class='bi fas fa-times'></i>")
                 ->setDisabled(true)
-                ->addExtraClass('button alert small');
+                ->addExtraClass('icon-link btn btn-danger small');
         } else {
             $label = _t(__CLASS__ . '.Attend', 'Direct inschrijven');
             return FormAction::create('attend', $label)
                 ->setUseButtonTag(true)
                 ->setAttribute('title', $label)
-                ->setButtonContent("<span>$label</span> <i class='far fa-plus'></i>")
-                ->addExtraClass('button primary');
+                ->setButtonContent("<span>$label</span> <i class='bi far fa-plus'></i>")
+                ->addExtraClass('icon-link btn btn-secondary');
         }
     }
 
@@ -360,7 +330,6 @@ class AttendForm extends Form
         // get the dates
         $attendableDates = EventDateTime::get()->filter(['ID' => $data['AttendableDates']]);
 
-
         $attendeeIds = [];
         if (isset($data['Attendee'])) {
             $attendeeIds[] = $data['Attendee'];
@@ -372,7 +341,6 @@ class AttendForm extends Form
         foreach ($attendableDates as $date) {
             /* @var EventDateTime|EventDateTimeExtension $date */
             $status = $date->AutoSkipWaitingList() ? 'Confirmed' : 'WaitingList';
-
             foreach ($attendeeIds as $attendee) {
                 $attendees[] = [
                     'Status' => $status,
@@ -396,12 +364,10 @@ class AttendForm extends Form
                 ];
             }
         }
-
         foreach ($attendees as $attendee) {
 
             // check if exists
             $attendance = EventAttendance::create($attendee);
-
             if (isset($attendee['MemberID']) && ($found = $attendance->EventDate()->Attendees()->find('MemberID', $attendee['MemberID']))) {
                 $attendance = $found;
             }

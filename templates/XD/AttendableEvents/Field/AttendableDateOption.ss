@@ -5,30 +5,22 @@
     </div>
     <div class="attendable-date-option__content">
         <div class="attendable-date-option__dates">
-            <% if not $StartDate.InPast %>
+            <% if $DayDateTimes %>
                 <% loop $DayDateTimes %>
                     <time>
                         $StartDate.Format(EE. d MMM Y)<% if $EndTime && $StartTime && $StartTime != $EndTime %>,
                         {$StartTime.Format('HH:mm')} &ndash; {$EndTime.Format('HH:mm')} uur<% else_if $StartTime != '00:00:00' %>,
                         {$StartTime.Format('HH:mm')} uur<% end_if %>
                     </time>
-
-                    <%-- <% if $StartDate.InPast %>
-                    <div class="attendable-date-option__action attendable-date-option__action--placed-available">
-                        Deze datum is al geweest.
-                    </div>
-                    <% end_if %> --%>
-
                 <% end_loop %>
+            <% else %>
+                <time>
+                    $StartDate.Format(EE. d MMM Y)<% if $EndTime && $StartTime && $StartTime != $EndTime %>,
+                    {$StartTime.Format('HH:mm')} &ndash; {$EndTime.Format('HH:mm')} uur<% else_if $StartTime != '00:00:00' %>,
+                    {$StartTime.Format('HH:mm')} uur<% end_if %>
+                </time>
             <% end_if %>
         </div>
-        <% if $Location %>
-            <% with $Location %>
-                <div class="attendable-date-option__location">
-                    $Title<% if $Suburb %>, $Suburb<% end_if %>
-                </div>
-            <% end_with %>
-        <% end_if %>
         <div class="attendable-date-option__actions">
             <span class="attendable-date-option__action attendable-date-option__action--placed-available">
                 <span class="attendable-date-option__action-icon"><i class="far fa-info-circle"></i></span>
@@ -43,8 +35,10 @@
                         Vol, geen plaatsen beschikbaar.
                     <% end_if %>
 
-                    <a href="{$Event.Link}ics/$ID" class="attendable-date-option__action attendable-date-option__action--add-to-calendar" title="Voeg toe aan agenda"><span class="attendable-date-option__action-icon"><i class="far fa-calendar-plus"></i></span> Voeg toe aan agenda</a>
-
+                    <a href="$Link('ics')" class="icon-link attendable-date-option__action attendable-date-option__action--add-to-calendar" title="Voeg toe aan agenda">
+                        <i class="bi far fa-calendar-plus"></i>
+                        Voeg toe aan agenda
+                    </a>
                 <% end_if %>
             </span>
             <% if $AttendingMembers %>
@@ -55,10 +49,11 @@
                     </span>
                 <% end_loop %>
             <% else_if $IsAttending %>
-                <a href="$UnattendLink" class="attendable-date-option__action attendable-date-option__action--unattend"><span class="attendable-date-option__action-icon"><i class="far fa-close"></i></span> Afmelden</a>
+                <a href="$UnattendLink" class="icon-link link-danger attendable-date-option__action attendable-date-option__action--unattend">
+                    <i class="bi far fa-close"></i>
+                    Afmelden
+                </a>
             <% end_if %>
-
-
         </div>
     </div>
 </div>

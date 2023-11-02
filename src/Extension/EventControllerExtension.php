@@ -18,28 +18,16 @@ class EventControllerExtension extends Extension
     private static $allowed_actions = [
         'AttendForm',
         'unattend',
-        'ics'
     ];
 
     public function getAttendableDates()
     {
-        return $this->owner->DateTimes();
+        return $this->owner->getUpcomingDates();
     }
 
     public function AttendForm()
     {
         return new AttendForm($this->owner);
-    }
-
-    public function ICS()
-    {
-        $params = $this->owner->getURLParams();
-        if (isset($params['ID'])) {
-            $id = (int) $params['ID'];
-            if($eventDateTime = EventDateTime::get()->byID($id)){
-                $eventDateTime->ICS();
-            }
-        }
     }
 
     public function unattend(HTTPRequest $request)

@@ -13,7 +13,6 @@ en:
     ConfirmedAttendees: 'Confirmed attendees'
     EventDetails: 'Event details'
     EventOptions: 'Event options'
-    Location: 'Location'
     StartDate: 'StartDate'
     StartTime: 'StartTime'
     EndTime: 'EndTime'
@@ -23,7 +22,6 @@ en:
     EndDate: 'End date'
     StartTime: 'Start time'
     EndTime: 'End time'
-    Location: 'Location'
   XD\AttendableEvents\Model\EventDayDateTime:
     StartDate: 'Start date'
     EndDate: 'End date'

@@ -28,7 +28,6 @@ nl:
     ConfirmedAttendees: 'Bevestigde deelnemers'
     EventDetails: 'Event details'
     EventOptions: 'Event opties'
-    Location: 'Locatie'
     StartDate: 'Startdatum'
     StartTime: 'Starttijd'
     EndTime: 'Eindtijd'
@@ -36,7 +35,6 @@ nl:
   XD\Events\Model\EventDateTime:
     PLURALNAME: 'Event data'
     SINGULARNAME: 'Event datum'
-    Location: 'Locatie'
     StartDate: 'Startdatum'
     StartTime: 'Starttijd'
     EndTime: 'Eindtijd'
@@ -46,7 +44,6 @@ nl:
     Attendees: 'Deelnemers'
     Confirmed: 'Bevestigd'
   XD\AttendableEvents\Model\EventDayDateTime:
-    Location: 'Locatie'
     StartDate: 'Startdatum'
     StartTime: 'Starttijd'
     EndTime: 'Eindtijd'

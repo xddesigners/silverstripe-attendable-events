@@ -13,9 +13,7 @@ use XD\AttendableEvents\Model\EventAttendance;
  */
 class MemberExtension extends DataExtension
 {
-
     private static $has_many = [
         'EventAttendances' => EventAttendance::class
     ];
-
 }

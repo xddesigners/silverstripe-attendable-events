@@ -35,31 +35,31 @@ class GridFieldConfig_EventDateTimes extends GridFieldConfig_RecordEditor
             new GridFieldSortableHeader(),
             new GridFieldPageCount(),
             new GridFieldPaginator(),
-            new GridFieldDeleteAction()]);
+            new GridFieldDeleteAction()
+        ]);
 
 
+        /** @var GridFieldEditButton $editButton */
         $editButton = $this->getComponentByType(GridFieldEditButton::class);
         $editButton->removeExtraClass('grid-field__icon-action--hidden-on-hover');
 
+        /** @var GridFieldDataColumns $dataColumns */
         $dataColumns = $this->getComponentByType(GridFieldDataColumns::class);
         $dataColumns->setDisplayFields([
             'StartDate' => [
-                'title' => _t(EventDateTime::Class.'.StartDate','StartDate'),
-            ],
-            'Location.Title' => [
-                'title' => _t(EventDateTime::Class.'.Location','Location'),
+                'title' => _t(EventDateTime::class . '.StartDate', 'StartDate'),
             ],
             'DayDateTimes.Count' => [
-                'title' => _t(EventDateTime::Class.'.DayDateTimes','Days'),
+                'title' => _t(EventDateTime::class . '.DayDateTimes', 'Days'),
             ],
             'AutoAttendeeLimit' => [
-                'title' => _t(EventDateTime::Class.'.AttendeeLimit','AttendeeLimit'),
+                'title' => _t(EventDateTime::class . '.AttendeeLimit', 'AttendeeLimit'),
             ],
-            'summaryAttendeeCount' => [
-                'title' => _t(EventDateTime::Class.'.Attendees','Attendees'),
+            'AttendeeCount' => [
+                'title' => _t(EventDateTime::class . '.Attendees', 'Attendees'),
             ],
-            'summaryConfirmedAttendeeCount' => [
-                'title' => _t(EventDateTime::Class.'.Confirmed','Confirmed'),
+            'ConfirmedAttendeeCount' => [
+                'title' => _t(EventDateTime::class . '.Confirmed', 'Confirmed'),
             ],
         ]);
 

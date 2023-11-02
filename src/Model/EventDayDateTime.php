@@ -33,14 +33,13 @@ class EventDayDateTime extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-
         $group = FieldGroup::create([
             $fields->dataFieldByName('StartTime'),
             $fields->dataFieldByName('EndTime')
         ]);
+
         $fields->removeByName(['StartTime','EndTime','EventDateTimeID']);
         $fields->insertAfter('StartDate',$group);
         return $fields;
     }
-
 }
