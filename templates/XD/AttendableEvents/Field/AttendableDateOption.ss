@@ -24,7 +24,7 @@
         <div class="attendable-date-option__actions">
             <span class="attendable-date-option__action attendable-date-option__action--placed-available">
                 <span class="attendable-date-option__action-icon"><i class="far fa-info-circle"></i></span>
-                <% if $StartDate.InPast %>
+                <% if $StartDateTime.InPast %>
                     Deze datum is al geweest.
                 <% else %>
                     <% if $IsUnlimited %>

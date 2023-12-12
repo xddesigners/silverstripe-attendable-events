@@ -241,15 +241,10 @@ class AttendForm extends Form
         // Check external
         $externalTicketProvider = $event->ExternalTicketProvider;
 
-        // check expiriation
         $eventExpired = false;
         if (!$dates->count()) {
             $eventExpired = true;
-        }
-
-        // todo niet uitgaan van db veld StartDate
-        $lastAvailableDate = DBDatetime::create()->setValue($dates->max('StartDate'));
-        if ($lastAvailableDate->InPast()) {
+        } elseif (($last = $dates->last()?->getStartDateTime()) && $last->InPast()) {
             $eventExpired = true;
         }
 
