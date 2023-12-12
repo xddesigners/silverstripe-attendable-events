@@ -89,8 +89,7 @@ class EventAttendance extends DataObject
         // member or outsider
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
-            $value = $attendeeField->Value ? $attendeeField->Value : '';
-            $values = json_decode($value, true);
+            $values = json_decode($attendeeField->Value ?? '', true);
             if ($values && is_array($values)) {
                 foreach($values as $key => $val) {
                     $itemField = clone $field;
@@ -111,7 +110,7 @@ class EventAttendance extends DataObject
     {
         $parsed = new ArrayList();
         foreach ($this->Fields() as $attendeeField) {
-            $values = json_decode($attendeeField->Value, true);
+            $values = json_decode($attendeeField->Value ?? '', true);
             if (is_array($values)) {
                 // Field is an multivalue field
                 $value = implode(', ', $values);
@@ -188,7 +187,7 @@ class EventAttendance extends DataObject
         $extraFields = [];
         $values = $fields->map('Title', 'Value')->toArray();
         foreach ($values as $title => $value) {
-            $values = json_decode($value ? $value : '', true);
+            $values = json_decode($value ?? '', true);
             if ($values && is_array($values)) {
                 foreach ($values as $key => $val) {
                     $extraFields[] = "$title: $val";        

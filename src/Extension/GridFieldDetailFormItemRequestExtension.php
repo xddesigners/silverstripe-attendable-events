@@ -8,6 +8,7 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest;
+use XD\AttendableEvents\Model\EventAttendance;
 use XD\Events\Model\EventDateTime;
 
 /**
@@ -19,17 +20,27 @@ use XD\Events\Model\EventDateTime;
 class GridFieldDetailFormItemRequestExtension extends Extension
 {
     private static $allowed_actions = [
-        'sendConfirmationEmail',
+        'sendEventConfirmationEmail',
         'testEventConfirmation'
     ];
 
     public function updateItemEditForm(Form $form)
     {
+        $connectionActions = CompositeField::create()->setName('ConnectionActions');
+        $connectionActions->setFieldHolderTemplate(CompositeField::class . '_holder_buttongroup');
+
+        if (($record = $this->owner->getRecord()) && $record instanceof EventAttendance) {
+            $sendConfirmationAction = FormAction::create('sendEventConfirmationEmail', _t(__CLASS__ . '.sendEventConfirmationEmail', 'Send confirmation'))
+            ->addExtraClass('btn btn-outline-secondary font-icon-p-mail')
+            ->setAttribute('data-icon', 'p-mail')
+            ->setUseButtonTag(true);
+
+            $connectionActions->push($sendConfirmationAction);
+
+            $form->Actions()->insertBefore('RightGroup', $connectionActions);
+        }
+
         if (($record = $this->owner->getRecord()) && $record instanceof EventDateTime) {
-
-            $connectionActions = CompositeField::create()->setName('ConnectionActions');
-            $connectionActions->setFieldHolderTemplate(CompositeField::class . '_holder_buttongroup');
-
             $testConfirmationAction = FormAction::create('testEventConfirmation', _t(__CLASS__ . '.testEventConfirmation', 'Test confirmation mail'))
                 ->addExtraClass('btn btn-outline-secondary font-icon-help-circled')
                 ->setAttribute('data-icon', 'help-circled')
@@ -37,13 +48,12 @@ class GridFieldDetailFormItemRequestExtension extends Extension
 
             $connectionActions->push($testConfirmationAction);
 
-            $sendConfirmationAction = FormAction::create('sendConfirmationEmail', _t(__CLASS__ . '.sendConfirmationEmail', 'Send confirmation to all attendees'))
+            $sendConfirmationAction = FormAction::create('sendEventConfirmationEmail', _t(__CLASS__ . '.sendEventConfirmationEmailToAll', 'Send confirmation to all attendees'))
                 ->addExtraClass('btn btn-outline-secondary font-icon-p-mail')
                 ->setAttribute('data-icon', 'p-mail')
                 ->setUseButtonTag(true);
 
             $connectionActions->push($sendConfirmationAction);
-
             $form->Actions()->insertBefore('RightGroup', $connectionActions);
         }
     }
@@ -53,9 +63,9 @@ class GridFieldDetailFormItemRequestExtension extends Extension
         $this->handleActionOnRecord('testEventConfirmation', 'Sent test confirmation', 'Cannot send test confirmation');
     }
 
-    public function sendConfirmationEmail()
+    public function sendEventConfirmationEmail()
     {
-        $this->handleActionOnRecord('sendEventConfirmation', 'Sent event confirmation', 'Cannot send event confirmation');
+        $this->handleActionOnRecord('sendEventConfirmationEmail', 'Sent event confirmation', 'Cannot send event confirmation');
     }
 
     public function handleActionOnRecord($method, $successMessage, $errorMessage)

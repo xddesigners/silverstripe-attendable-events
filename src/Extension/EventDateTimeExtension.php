@@ -137,7 +137,7 @@ class EventDateTimeExtension extends DataExtension
         return $testAttendee->sendEventConfirmationEmail();
     }
 
-    public function sendEventConfirmation()
+    public function sendEventConfirmationEmail()
     {
         $sent = [];
         foreach ($this->owner->Attendees()->filter(['Status' => 'Confirmed', 'EventConfirmationEmailSent' => null]) as $attendee) {
