@@ -43,7 +43,7 @@ class AttendOptionsetField extends AttendField
         if ($field instanceof SelectField) {
             $field->setSource($this->Options()->map('Value', 'Title')->toArray());
             
-            $value = $this->Value;
+            $value = $this->Value ?? '';
             if ($field instanceof MultiSelectField && !is_array($value)) {
                 $value = json_decode($value, true);
             }

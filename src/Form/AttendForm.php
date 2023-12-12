@@ -60,19 +60,16 @@ class AttendForm extends Form
         $eventExpired = false;
         if (!$dates->count()) {
             $eventExpired = true;
-        }
-
-        $lastAvailableDate = DBDatetime::create()->setValue($dates->max('StartDate'));
-        if ($lastAvailableDate->InPast()) {
+        } elseif (($last = $dates->last()->getStartDateTime()) && $last->InPast()) {
             $eventExpired = true;
         }
         
-        if( $eventExpired ){
+        if ($eventExpired) {
             $this->addExtraClass('attend-form--expired');
         }
 
         $externalTicketProvider = $event->ExternalTicketProvider;
-        if( $externalTicketProvider ){
+        if ($externalTicketProvider) {
             $this->addExtraClass('attend-form--external');
         } elseif(!$eventExpired) {
             $memberFields = $this->createMemberFields($controller);
@@ -192,7 +189,6 @@ class AttendForm extends Form
     private function createMemberFields($controller)
     {
         $members = $this->getMembers();
-
         if ($members && $members->count() > 1) {
             return CheckboxSetField::create(
                 'Attendees',
@@ -359,6 +355,7 @@ class AttendForm extends Form
                 ];
             }
         }
+
         foreach ($attendees as $attendee) {
 
             // check if exists
