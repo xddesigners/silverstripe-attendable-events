@@ -43,7 +43,8 @@ class EventDateTimeExtension extends DataExtension
     ];
 
     private static $defaults = [
-        'SkipWaitingList' => 1
+        'SkipWaitingList' => 1,
+        'AttendeeLimit' => -1
     ];
 
     public function getListTitle()
@@ -265,7 +266,7 @@ class EventDateTimeExtension extends DataExtension
         // force change to trigger onAfterWrite()
         $this->owner->LastEdited = DBDatetime::now()->Rfc2822();
         // $this->owner->Title = $this->owner->StartDate;
-        
+
         // sync date
         $days = $this->owner->DayDateTimes();
         if ($days->exists()) {

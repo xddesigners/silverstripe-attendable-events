@@ -33,6 +33,10 @@ class EventPageExtension extends DataExtension
         'AttendFields' => AttendField::class
     ];
 
+    private static $defaults = [
+        'AttendeeLimit' => -1
+    ];
+    
     public function updateCMSFields(FieldList $fields)
     {
 

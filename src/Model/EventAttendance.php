@@ -52,7 +52,6 @@ class EventAttendance extends DataObject
     private static $summary_fields = [
         'Status',
         'Title',
-        'AttendeeOrganisation',
         'EventDate.StartDate' => 'Start',
         'EventConfirmationEmailSent',
         'WaitingListConfirmationEmailSent',
@@ -214,14 +213,14 @@ class EventAttendance extends DataObject
 
     private function memberOrAttendeeField($field, $memberField = null)
     {
-        if (!($member = $this->Member()) && !$member->exists()) {
+
+        if (!($member = $this->Member()) || !$member->exists()) {
             return $this->{$field};
         }
 
         if (!$memberField) {
             $memberField = $field;
         }
-
         return $member->{$memberField};
     }
 
