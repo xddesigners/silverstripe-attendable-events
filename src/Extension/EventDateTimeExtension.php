@@ -4,6 +4,7 @@ namespace XD\AttendableEvents\Extension;
 
 use Exception;
 use LeKoala\ExcelImportExport\ExcelGridFieldExportButton;
+use SilverShop\HasOneField\HasOneButtonField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\CompositeField;
@@ -17,6 +18,7 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Security;
 use XD\AttendableEvents\Model\EventAttendance;
+use XD\AttendableEvents\Model\EventLocation;
 use XD\AttendableEvents\GridField\GridFieldConfig_EventAttendees;
 use XD\AttendableEvents\Model\EventDayDateTime;
 use XD\Basic\GridField\GridFieldConfig_Sortable;
@@ -37,6 +39,10 @@ class EventDateTimeExtension extends DataExtension
         'ShowAsFull' => 'Boolean',
     ];
 
+    private static $has_one = [
+        'Location' => EventLocation::class
+    ];
+
     private static $has_many = [
         'Attendees' => EventAttendance::class,
         'DayDateTimes' => EventDayDateTime::class
@@ -49,7 +55,7 @@ class EventDateTimeExtension extends DataExtension
 
     public function getListTitle()
     {
-        return $this->owner->StartDate;
+        return $this->owner->LocationID ? $this->owner->StartDate . ' - ' . $this->owner->Location()->Title : $this->owner->StartDate;
     }
 
     public function updateCMSFields(FieldList $fields)
@@ -64,6 +70,8 @@ class EventDateTimeExtension extends DataExtension
             $fields->addFieldToTab('Root.Main', $daysGrid);
         }
 
+        $locationField = HasOneButtonField::create($this->owner, 'Location', 'LocationID', _t(__CLASS__ . '.Location', 'Location'));
+
         $fields->addFieldsToTab('Root.Main', [
             CompositeField::create([
                 FieldGroup::create([
@@ -74,6 +82,7 @@ class EventDateTimeExtension extends DataExtension
                 CheckboxField::create('ShowAsFull', _t(__CLASS__ . '.ShowAsFull', 'Toon event als vol')),
                 CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place attendees directly in confirmed list'))
                     ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
+                $locationField
             ])->setTitle(_t(__CLASS__ . '.EventDetails', 'Event details')),
             CompositeField::create([
                 CheckboxField::create('Pinned', _t(__CLASS__ . '.Pinned', 'Pinned')),
@@ -265,7 +274,10 @@ class EventDateTimeExtension extends DataExtension
         parent::onBeforeWrite();
         // force change to trigger onAfterWrite()
         $this->owner->LastEdited = DBDatetime::now()->Rfc2822();
-        // $this->owner->Title = $this->owner->StartDate;
+        $this->owner->Title = $this->owner->StartDate;
+        if ($location = $this->owner->Location()) {
+            $this->owner->Title = $this->owner->StartDate . ' - ' . $location->Title;
+        }
 
         // sync date
         $days = $this->owner->DayDateTimes();
