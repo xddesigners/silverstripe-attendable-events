@@ -3,9 +3,11 @@
 namespace XD\AttendableEvents\Forms\Fields;
 
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Forms\Filter\SlugFilter;
 use SilverStripe\Forms\FormField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationResult;
+use SilverStripe\View\Parsers\URLSegmentFilter;
 use XD\AttendableEvents\Model\EventAttendance;
 use XD\Events\Model\EventPage;
 

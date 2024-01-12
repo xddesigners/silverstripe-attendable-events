@@ -344,9 +344,9 @@ class AttendForm extends Form
         // if external user
         if (isset($data['Name'])) {
             foreach ($attendableDates as $date) {
+                $status = $date->AutoExternalAttendeesSkipWaitingList() ? 'Confirmed' : 'WaitingList';
                 $attendee = [
-                    // !! external user should always go into the WaitingList !!
-                    'Status' => 'WaitingList',
+                    'Status' => $status,
                     'EventDateID' => $date->ID,
                     'Name' => $data['Name'],
                     'Email' => $data['Email'],

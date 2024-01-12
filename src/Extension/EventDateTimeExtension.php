@@ -36,6 +36,7 @@ class EventDateTimeExtension extends DataExtension
     private static $db = [
         'AttendeeLimit' => 'Int',
         'SkipWaitingList' => 'Boolean',
+        'ExternalAttendeesSkipWaitingList' => 'Boolean',
         'ShowAsFull' => 'Boolean',
     ];
 
@@ -61,7 +62,7 @@ class EventDateTimeExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         $fields->removeByName(['Title', 'AttendeeLimit', 'ShowAsFull', 'SkipWaitingList', 'AutoSendConfirmation', 'ExternalTicketProvider',
-            'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes']);
+            'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes', 'ExternalAttendeesSkipWaitingList']);
 
         if ($this->owner->ID) {
             $fields->removeByName('StartDate');
@@ -80,8 +81,9 @@ class EventDateTimeExtension extends DataExtension
                     NumericField::create('ConfirmedAttendeeCount', _t(__CLASS__ . '.ConfirmedAttendees', 'ConfirmedAttendees'))->setDisabled(true),
                 ]),
                 CheckboxField::create('ShowAsFull', _t(__CLASS__ . '.ShowAsFull', 'Toon event als vol')),
-                CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place attendees directly in confirmed list'))
+                CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place logged in attendees directly in confirmed list.'))
                     ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
+                CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.')),
                 $locationField
             ])->setTitle(_t(__CLASS__ . '.EventDetails', 'Event details')),
             CompositeField::create([
@@ -179,11 +181,12 @@ class EventDateTimeExtension extends DataExtension
 
     public function AutoSkipWaitingList()
     {
-        // echo '<pre>';
-        // print_r($this->owner->SkipWaitingList ?: $this->owner->Event()->SkipWaitingList);
-        // echo '</pre>';
-        // exit();
         return $this->owner->SkipWaitingList ?: $this->owner->Event()->SkipWaitingList;
+    }
+
+    public function AutoExternalAttendeesSkipWaitingList()
+    {
+        return $this->owner->ExternalAttendeesSkipWaitingList ?: $this->owner->Event()->ExternalAttendeesSkipWaitingList;
     }
 
     public function AttendeeCount()
