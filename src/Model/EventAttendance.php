@@ -8,6 +8,7 @@ use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\ArrayData;
 use XD\AttendableEvents\Forms\Fields\AttendField;
@@ -367,6 +368,30 @@ class EventAttendance extends DataObject
         $this->EventConfirmationEmailSent = DBDatetime::now()->getValue();
         $this->write();
         return true;
+    }
+
+    public function canView($member = null)
+    {
+        if (parent::canView($member)) return true;
+        return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
+    }
+
+    public function canEdit($member = null)
+    {
+        if (parent::canEdit($member)) return true;
+        return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
+    }
+
+    public function canDelete($member = null)
+    {
+        if (parent::canDelete($member)) return true;
+        return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
+    }
+
+    public function canCreate($member = null, $context = [])
+    {
+        if (parent::canCreate($member, $context)) return true;
+        return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
     }
 
 }
