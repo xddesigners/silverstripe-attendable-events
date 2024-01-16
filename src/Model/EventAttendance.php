@@ -7,6 +7,7 @@ use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
+use SilverStripe\ORM\FieldType\DBEnum;
 use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\ArrayData;
@@ -50,7 +51,7 @@ class EventAttendance extends DataObject
     ];
 
     private static $summary_fields = [
-        'Status',
+        'StatusNice' => 'Status', 
         'Title',
         'AttendeeOrganisation',
         'EventDate.StartDate' => 'Start',
@@ -59,13 +60,19 @@ class EventAttendance extends DataObject
     ];
 
     private static $exported_fields = [
-        'Status' => 'Status',
+        'StatusNice' => 'Status',
         'AttendeeName' => 'Naam',
         'AttendeeEmail' => 'Email', 
         'AttendeePhone' => 'Telefoon',
         'EventDate.StartDate' => 'EventDate',
         'ExtraFields' => 'Extra velden'
     ];
+
+    public function getStatusNice()
+    {
+        $status = $this->Status ?? $this->dbObject('Status')->getDefault();
+        return _t(__CLASS__ . ".Status_{$status}", $status);
+    }
 
     public function getCMSFields()
     {
@@ -74,6 +81,15 @@ class EventAttendance extends DataObject
         $fields->addFieldsToTab('Root.Main', [
             DropdownField::create('MemberID', _t(__CLASS__ . '.Member', 'Deelnemer'), Member::get()->map()->toArray())->setEmptyString(_t(__CLASS__ . '.ChooseMember', 'Choose member'))
         ]);
+
+        $fields->replaceField('Status', DropdownField::create(
+            'Status',
+            _t(__CLASS__ . '.Status', 'Status'),
+            array_map(
+                fn($status) => _t(__CLASS__ . ".Status_{$status}", $status), 
+                $this->dbObject('Status')->enumValues()
+            )
+        ));
 
         if ($this->EventDateID) {
             /** @var EventPage $event */
