@@ -2,45 +2,33 @@
 
 namespace XD\AttendableEvents\Model;
 
-use SilverStripe\Forms\CompositeField;
-use SilverStripe\Forms\FieldGroup;
+use SilverStripe\Forms\Tab;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Permission;
-use XD\Events\Model\EventDateTime;
+use XD\Basic\Injector\Addressable;
 
-class EventDayDateTime extends DataObject
-{
+class EventLocation extends DataObject{
 
-    private static $table_name = 'AttendableEvents_EventDayDateTime';
+    private static $table_name = 'AttendableEvents_EventLocation';
 
     private static $db = [
-        'StartDate' => 'Date',
-        'StartTime' => 'Time',
-        'EndTime' => 'Time',
+        'Title' => 'Varchar'
     ];
 
-    private static $has_one = [
-        'EventDateTime' => EventDateTime::class
+    private static $extensions = [
+        Addressable::class
     ];
-
-    private static $summary_fields = [
-        'StartDate',
-        'StartTime',
-        'EndTime',
-    ];
-
-    private static $default_sort = 'StartDate ASC, StartTime ASC, EndTime ASC';
 
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
-        $group = FieldGroup::create([
-            $fields->dataFieldByName('StartTime'),
-            $fields->dataFieldByName('EndTime')
-        ]);
 
-        $fields->removeByName(['StartTime','EndTime','EventDateTimeID']);
-        $fields->insertAfter('StartDate',$group);
+        /* @var Tab $tab */
+        $tab = $fields->fieldByName('Root.Address');
+        $fields->removeByName('Address');
+        $fields->addFieldsToTab('Root.Main',$tab->Fields());
+        $fields->removeByName('AddressHeader');
+
         return $fields;
     }
 

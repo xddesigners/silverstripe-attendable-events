@@ -25,6 +25,7 @@ class EventPageExtension extends DataExtension
         'AttendeeLimit' => 'Int', // used for override
         'SkipWaitingList' => 'Boolean', // used for override
         'AllowExternalAttendees' => 'Boolean',
+        'ExternalAttendeesSkipWaitingList' => 'Boolean',
         'EventWaitingListConfirmationEmailContent' => 'HTMLText',
         'EventConfirmationEmailContent' => 'HTMLText',
     ];
@@ -33,6 +34,10 @@ class EventPageExtension extends DataExtension
         'AttendFields' => AttendField::class
     ];
 
+    private static $defaults = [
+        'AttendeeLimit' => -1
+    ];
+    
     public function updateCMSFields(FieldList $fields)
     {
 
@@ -47,9 +52,10 @@ class EventPageExtension extends DataExtension
         $fields->addFieldsToTab('Root.Date', [
             NumericField::create('AttendeeLimit', _t(__CLASS__ . '.AttendeeLimit', 'Attendee limit'))
                 ->setDescription(_t(__CLASS__ . '.AttendeeLimitDescription', 'This value is used for all the dates above if they are set to value 0. Limit of 0 means unlimited.')),
-            CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place attendees directly in confirmed list'))
+            CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place logged in attendees directly in confirmed list.'))
                 ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'This value is used for all dates if it is set.')),
-            CheckboxField::create('AllowExternalAttendees', _t(__CLASS__ . '.AllowExternalAttendees', 'Allow external attendees (no login required).'))
+            CheckboxField::create('AllowExternalAttendees', _t(__CLASS__ . '.AllowExternalAttendees', 'Allow external attendees (no login required).')),
+            CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.'))
         ]);
 
         /** @var Tab $tab */

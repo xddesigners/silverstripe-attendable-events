@@ -1,10 +1,11 @@
 nl:
   XD\AttendableEvents\Extension\EventPageExtension:
     AttendeeLimit: 'Deelnemer limiet'
-    AttendeeLimitDescription: 'Deze waarde wordt gebruikt voor alle bovenstaande datums als ze zijn ingesteld op waarde 0. Limiet van 0 betekent onbeperkt.'
-    SkipWaitingList: 'Plaats deelnemers direct in de bevestigde lijst'
+    AttendeeLimitDescription: 'Deze waarde wordt gebruikt voor alle bovenstaande datums als ze zijn ingesteld op waarde -1. Limiet van -1 betekent onbeperkt.'
+    SkipWaitingList: 'Plaats ingelogde deelnemers direct in de bevestigde lijst.'
     SkipWaitingListDescription: 'Deze waarde wordt gebruikt voor alle datums als deze is ingesteld.'
     AllowExternalAttendees: 'Sta externe deelnemers toe (login niet nodig voor aanmelding).'
+    ExternalAttendeesSkipWaitingList: 'Plaats externe deelnemers direct in de bevestigde lijst.'
 
     EventWaitingListConfirmationEmailContent: 'Event wachtlijst bevestiging e-mail inhoud'
     EventWaitingListConfirmationEmailContenDescription: 'Overschrijf de standaardinstellingen van onderdeel Instellingen'
@@ -21,9 +22,10 @@ nl:
 
   XD\AttendableEvents\Extension\EventDateTimeExtension:
     AttendeeLimit: 'Deelnemer limiet'
-    AttendeeLimitDescription: 'Deze waarde wordt gebruikt voor alle bovenstaande datums als ze zijn ingesteld op waarde 0. Limiet van 0 betekent onbeperkt.'
-    SkipWaitingList: 'Plaats deelnemers direct in de bevestigde lijst'
+    AttendeeLimitDescription: 'Deze waarde wordt gebruikt voor alle bovenstaande datums als ze zijn ingesteld op waarde -1. Limiet van -1 betekent onbeperkt.'
+    SkipWaitingList: 'Plaats ingelogde deelnemers direct in de bevestigde lijst.'
     SkipWaitingListDescription: 'Deze waarde wordt gebruikt voor alle datums als deze is ingesteld.'
+    ExternalAttendeesSkipWaitingList: 'Plaats externe deelnemers direct in de bevestigde lijst.'
     Attendees: 'Deelnemers'
     ConfirmedAttendees: 'Bevestigde deelnemers'
     EventDetails: 'Event details'

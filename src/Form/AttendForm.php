@@ -54,7 +54,7 @@ class AttendForm extends Form
         $fields = new FieldList([
             $attendableDatesField,
         ]);
-        
+
 
         // check expiration
         $eventExpired = false;
@@ -63,7 +63,7 @@ class AttendForm extends Form
         } elseif (($last = $dates->last()->getStartDateTime()) && $last->InPast()) {
             $eventExpired = true;
         }
-        
+
         if ($eventExpired) {
             $this->addExtraClass('attend-form--expired');
         }
@@ -71,7 +71,7 @@ class AttendForm extends Form
         $externalTicketProvider = $event->ExternalTicketProvider;
         if ($externalTicketProvider) {
             $this->addExtraClass('attend-form--external');
-        } elseif(!$eventExpired) {
+        } elseif (!$eventExpired) {
             $memberFields = $this->createMemberFields($controller);
             $fields->push($memberFields);
         }
@@ -95,11 +95,11 @@ class AttendForm extends Form
                 $field = $attendField->getFormField($members);
                 $fields->add($field);
                 if ($attendField->Required) {
-                    if( get_class($field) == CompositeField::class ){
-                     $children = $field->getChildren();
-                     foreach( $children as $child ){
-                         $requiredFields->addRequiredField($child->getName());
-                     }
+                    if (get_class($field) == CompositeField::class) {
+                        $children = $field->getChildren();
+                        foreach ($children as $child) {
+                            $requiredFields->addRequiredField($child->getName());
+                        }
 
                     } else {
                         $requiredFields->addRequiredField($field->getName());
@@ -112,7 +112,7 @@ class AttendForm extends Form
         $actions = new FieldList([$action]);
         parent::__construct($controller, self::DEFAULT_NAME, $fields, $actions, $requiredFields);
 
-        if ($event->AllowExternalAttendees && !Security::getCurrentUser() && $this->hasMethod('enableSpamProtection') )   {
+        if ($event->AllowExternalAttendees && !Security::getCurrentUser() && $this->hasMethod('enableSpamProtection')) {
             $this->enableSpamProtection();
         }
 
@@ -120,7 +120,7 @@ class AttendForm extends Form
 
     }
 
-    private function getMembers()
+    public function getMembers()
     {
         $member = Security::getCurrentUser();
 
@@ -161,7 +161,7 @@ class AttendForm extends Form
             // 1. in het verleden
             // 2. geen plek meer beschikbaar
 
-            if ($date->dbObject('StartDate')->InPast() || !$date->getPlacesAvailable() ) {
+            if ($date->dbObject('StartDate')->InPast() || !$date->getPlacesAvailable()) {
                 $disabled[$date->ID] = $date->ID;
             }
 
@@ -175,7 +175,7 @@ class AttendForm extends Form
         $field->setValue($attending);
 
         // Wanneer er maar 1 optie beschikbaar is, plaats deze in een hidden field
-        if ($dates->count() === 1 ) {
+        if ($dates->count() === 1) {
             // $field->setValue([$dates->first()->ID]);
             $field = CompositeField::create([
                 HiddenField::create('AttendableDates', _t(__CLASS__ . '.AttendableDates', 'Selecteer datum'), $dates->first()->ID),
@@ -210,7 +210,7 @@ class AttendForm extends Form
             return CompositeField::create([
                 HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
                 LiteralField::create('AskLogin', _t(
-                    __CLASS__ . '.AskLogin', 
+                    __CLASS__ . '.AskLogin',
                     '<p>Heeft u een account? <a href="/Security/login?BackURL={link}">Log dan eerst in.</a> <br>Zonder een account kunt u zich aanmelden via onderstaand formulier.</p>',
                     null,
                     ['link' => $controller->Link()]
@@ -245,11 +245,11 @@ class AttendForm extends Form
         }
 
         $availability = [];
-        if( $eventExpired ) {
+        if ($eventExpired) {
             $placesAvailable = 0;
         } else {
             foreach ($dates as $date) {
-                /** @var Attendable $date */
+                /** @var AttendableDate $date */
                 $availability[] = $date->getPlacesAvailable();
             }
             $placesAvailable = (boolean)max($availability);
@@ -344,15 +344,17 @@ class AttendForm extends Form
         // if external user
         if (isset($data['Name'])) {
             foreach ($attendableDates as $date) {
-                $attendees[] = [
-                    // !! external user should always go into the WaitingList !!
-                    'Status' => 'WaitingList',
+                $status = $date->AutoExternalAttendeesSkipWaitingList() ? 'Confirmed' : 'WaitingList';
+                $attendee = [
+                    'Status' => $status,
                     'EventDateID' => $date->ID,
                     'Name' => $data['Name'],
                     'Email' => $data['Email'],
                     'Phone' => $data['Phone'],
                     'Organisation' => $data['Organisation'],
                 ];
+                $this->extend('updateExternalAttendeeData', $attendee, $data, $date);
+                $attendees[] = $attendee;
             }
         }
 
