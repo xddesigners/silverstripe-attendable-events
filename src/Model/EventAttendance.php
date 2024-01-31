@@ -212,7 +212,7 @@ class EventAttendance extends DataObject
         return false;
     }
 
-    private function memberOrAttendeeField($field, $memberField = null)
+    public function memberOrAttendeeField($field, $memberField = null)
     {
 
         if (!($member = $this->Member()) || !$member->exists()) {

@@ -32,7 +32,6 @@ class AttendOptionsetField extends AttendField
                 )
             ]);
         }
-
         return $fields;
     }
 
@@ -42,15 +41,19 @@ class AttendOptionsetField extends AttendField
         $field = $fieldType::create($this->getFieldName(), $this->Title);
         if ($field instanceof SelectField) {
             $field->setSource($this->Options()->map('Value', 'Title')->toArray());
-            
+
             $value = $this->Value ?? '';
             if ($field instanceof MultiSelectField && !is_array($value)) {
                 $value = json_decode($value, true);
             }
-            
+
             $field->setValue($value);
         }
-
+        $disabledItems = $this->owner->Options()->filter('Disabled', true);
+        if ($disabledItems->exists()) {
+            $field->setDisabledItems($disabledItems->column('Value'));
+        }
+        $this->extend('updateFormField', $field);
         return $field;
     }
 }
