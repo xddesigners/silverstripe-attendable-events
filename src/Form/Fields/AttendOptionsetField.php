@@ -6,7 +6,8 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\MultiSelectField;
 use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\SelectField;
-use XD\Basic\GridField\GridFieldConfig_SortableEditableInline;
+use XD\AttendableEvents\GridField\GridFieldConfig_AttendFieldOptions;
+
 
 class AttendOptionsetField extends AttendField
 {
@@ -28,7 +29,7 @@ class AttendOptionsetField extends AttendField
                     'Options',
                     _t(__CLASS__ . '.Options', 'Options'),
                     $this->Options(),
-                    GridFieldConfig_SortableEditableInline::create()
+                    GridFieldConfig_AttendFieldOptions::create()
                 )
             ]);
         }
