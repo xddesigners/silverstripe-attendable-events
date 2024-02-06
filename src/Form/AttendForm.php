@@ -164,6 +164,13 @@ class AttendForm extends Form
             if ($date->dbObject('StartDate')->InPast() || !$date->getPlacesAvailable()) {
                 $disabled[$date->ID] = $date->ID;
             }
+            
+            $members = $this->getMembers();
+            foreach ($members as $member) {
+                if ($date->getIsAttending($member)) {
+                    $attending[$date->ID] = $date->ID;
+                }    
+            }
 
             if ($date->getIsAttending()) {
                 $attending[$date->ID] = $date->ID;
@@ -206,7 +213,7 @@ class AttendForm extends Form
             ]);
         }
 
-        if (self::config()->get('allow_external_attendees')) {
+        if (self::config()->get('allow_external_attendees') && $controller->AllowExternalAttendees) {
             return CompositeField::create([
                 HeaderField::create('MemberHeader', _t(__CLASS__ . '.MemberHeader', 'Jouw gegevens'), 5),
                 LiteralField::create('AskLogin', _t(
