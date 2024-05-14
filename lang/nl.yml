@@ -6,7 +6,7 @@ nl:
     SkipWaitingListDescription: 'Deze waarde wordt gebruikt voor alle datums als deze is ingesteld.'
     AllowExternalAttendees: 'Sta externe deelnemers toe (login niet nodig voor aanmelding).'
     ExternalAttendeesSkipWaitingList: 'Plaats externe deelnemers direct in de bevestigde lijst.'
-
+    UnattendAllowed: 'Afmelden toestaan'
     EventWaitingListConfirmationEmailContent: 'Event wachtlijst bevestiging e-mail inhoud'
     EventWaitingListConfirmationEmailContenDescription: 'Overschrijf de standaardinstellingen van onderdeel Instellingen'
     EventConfirmationEmailContent: 'Event bevestigings e-mail inhoud'

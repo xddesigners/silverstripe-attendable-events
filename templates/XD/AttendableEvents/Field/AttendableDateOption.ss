@@ -41,18 +41,34 @@
                     </a>
                 <% end_if %>
             </span>
-            <% if $AttendingMembers %>
-                <% loop $AttendingMembers %>
+            <% if $Event.AllowUnattend %>
+                <% if $AttendingMembers %>
+                    <% loop $AttendingMembers %>
+                        <span class="attendable-date-option__action attendable-date-option__action--member">
+                            <span>$Title</span>
+                            <a href="$Up.getUnattendLink($MemberID)" class="attendable-date-option__action attendable-date-option__action--unattend"><span class="attendable-date-option__action-icon"><i class="far fa-close"></i></span>  Afmelden</a>
+                        </span>
+                    <% end_loop %>
+                <% else_if $IsAttending %>
+                    <a href="$UnattendLink" class="icon-link link-danger attendable-date-option__action attendable-date-option__action--unattend">
+                        <i class="bi far fa-close"></i>
+                        Afmelden
+                    </a>
+                <% end_if %>
+            <% else %>
+                <% if $AttendingMembers %>
+                    <% loop $AttendingMembers %>
+                        <span class="attendable-date-option__action attendable-date-option__action--member">
+                            <i class="far fa-check"></i>
+                            <span>Reeds aangemeld: $Title</span>
+                        </span>
+                    <% end_loop %>
+                <% else_if $IsAttending %>
                     <span class="attendable-date-option__action attendable-date-option__action--member">
-                        <span>$Title</span>
-                        <a href="$Up.getUnattendLink($MemberID)" class="attendable-date-option__action attendable-date-option__action--unattend"><span class="attendable-date-option__action-icon"><i class="far fa-close"></i></span>  Afmelden</a>
+                        <i class="far fa-check"></i>
+                        <span>Reeds aangemeld</span>
                     </span>
-                <% end_loop %>
-            <% else_if $IsAttending %>
-                <a href="$UnattendLink" class="icon-link link-danger attendable-date-option__action attendable-date-option__action--unattend">
-                    <i class="bi far fa-close"></i>
-                    Afmelden
-                </a>
+                <% end_if %>
             <% end_if %>
         </div>
     </div>

@@ -28,6 +28,7 @@ class EventPageExtension extends DataExtension
         'ExternalAttendeesSkipWaitingList' => 'Boolean',
         'EventWaitingListConfirmationEmailContent' => 'HTMLText',
         'EventConfirmationEmailContent' => 'HTMLText',
+        'UnattendAllowed' => 'Boolean'
     ];
 
     private static $has_many = [
@@ -55,7 +56,8 @@ class EventPageExtension extends DataExtension
             CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place logged in attendees directly in confirmed list.'))
                 ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'This value is used for all dates if it is set.')),
             CheckboxField::create('AllowExternalAttendees', _t(__CLASS__ . '.AllowExternalAttendees', 'Allow external attendees (no login required).')),
-            CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.'))
+            CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.')),
+            CheckboxField::create('UnattendAllowed', _t(__CLASS__ . '.UnattendAllowed', 'Allow to unattend.')),
         ]);
 
         /** @var Tab $tab */
