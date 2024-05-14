@@ -49,7 +49,7 @@
                                             </td>
                                         </tr>
                                         <% end_if %>
-                                        <% if $AutoAttendeeLimit %>
+                                        <% if $AutoAttendeeLimit && $AutoAttendeeLimit > 0 %>
                                         <tr style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;">
                                             <td style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;vertical-align: top;font-size: 14px;padding: 0 0 4px;text-align: left;color:#002e67;">
                                                 Maximum aantal deelnemers:
