@@ -98,10 +98,12 @@ class AttendForm extends Form
                     if (get_class($field) == CompositeField::class) {
                         $children = $field->getChildren();
                         foreach ($children as $child) {
+                            $child->addExtraClass('requiredField');
                             $requiredFields->addRequiredField($child->getName());
                         }
 
                     } else {
+                        $field->addExtraClass('requiredField');
                         $requiredFields->addRequiredField($field->getName());
                     }
                 }

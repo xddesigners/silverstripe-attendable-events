@@ -43,6 +43,7 @@ class EventDateTimeExtension extends DataExtension
         'Title' => 'Varchar',
         'AttendeeLimit' => 'Int',
         'SkipWaitingList' => 'Boolean',
+        'ExternalAttendeesSkipWaitingList' => 'Boolean',
         'ShowAsFull' => 'Boolean',
     ];
 
@@ -96,11 +97,11 @@ class EventDateTimeExtension extends DataExtension
                 CheckboxField::create('ShowAsFull', _t(__CLASS__ . '.ShowAsFull', 'Toon event als vol')),
                 CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place attendees directly in confirmed list'))
                     ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
+                CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.')),
                 $locationField,
             ])->setTitle(_t(__CLASS__ . '.EventDetails', 'Event details')),
             CompositeField::create([
                 CheckboxField::create('Pinned', _t(__CLASS__ . '.Pinned', 'Pinned')),
-                CheckboxField::create('PinnedForever', _t(__CLASS__ . '.PinnedForever', 'Pinned forever')),
             ])->setTitle(_t(__CLASS__ . '.EventOptions', 'Event options')),
         ]);
 
@@ -248,6 +249,11 @@ class EventDateTimeExtension extends DataExtension
     public function AutoSkipWaitingList()
     {
         return $this->owner->SkipWaitingList ?: $this->owner->Event()->SkipWaitingList;
+    }
+
+    public function AutoExternalAttendeesSkipWaitingList()
+    {
+        return $this->owner->ExternalAttendeesSkipWaitingList ?: $this->owner->Event()->ExternalAttendeesSkipWaitingList;
     }
 
     /**
