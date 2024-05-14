@@ -41,15 +41,20 @@
                     </a>
                 <% end_if %>
             </span>
-            <% if $Event.AllowUnattend %>
+            <% if $Event.UnattendAllowed %>
                 <% if $AttendingMembers %>
                     <% loop $AttendingMembers %>
                         <span class="attendable-date-option__action attendable-date-option__action--member">
-                            <span>$Title</span>
+                            <i class="far fa-check"></i>
+                            <span>Reeds aangemeld: $Title</span>
                             <a href="$Up.getUnattendLink($MemberID)" class="attendable-date-option__action attendable-date-option__action--unattend"><span class="attendable-date-option__action-icon"><i class="far fa-close"></i></span>  Afmelden</a>
                         </span>
                     <% end_loop %>
                 <% else_if $IsAttending %>
+                    <span class="attendable-date-option__action attendable-date-option__action--member">
+                        <i class="far fa-check"></i>
+                        <span>Reeds aangemeld</span>
+                    </span>
                     <a href="$UnattendLink" class="icon-link link-danger attendable-date-option__action attendable-date-option__action--unattend">
                         <i class="bi far fa-close"></i>
                         Afmelden
