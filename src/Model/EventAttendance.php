@@ -104,7 +104,7 @@ class EventAttendance extends DataObject
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
             $value = $attendeeField->Value ? $attendeeField->Value : '';
-            $values = json_decode($value, true);
+            $values = $value ? json_decode($value, true) : false;
             if ($values && is_array($values)) {
                 foreach($values as $key => $val) {
                     $itemField = clone $field;
@@ -125,7 +125,7 @@ class EventAttendance extends DataObject
     {
         $parsed = new ArrayList();
         foreach ($this->Fields() as $attendeeField) {
-            $values = json_decode($attendeeField->Value, true);
+            $values = json_decode(''.$attendeeField->Value, true);
             // Field is a diet field
             if ($attendeeField instanceof AttendMemberDietField) {
                 $value = [];

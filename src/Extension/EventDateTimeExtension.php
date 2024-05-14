@@ -75,7 +75,7 @@ class EventDateTimeExtension extends DataExtension
 
     public function updateCMSFields(FieldList $fields)
     {
-        $fields->removeByName(['Title', 'AttendeeLimit', 'ShowAsFull', 'SkipWaitingList', 'AutoSendConfirmation', 'ExternalTicketProvider',
+        $fields->removeByName(['Title', 'AttendeeLimit', 'ShowAsFull', 'SkipWaitingList', 'ExternalAttendeesSkipWaitingList', 'AutoSendConfirmation', 'ExternalTicketProvider',
             'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes']);
 
         if ($this->owner->ID) {

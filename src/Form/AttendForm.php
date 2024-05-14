@@ -388,7 +388,7 @@ class AttendForm extends Form
                     if ($attendField = $event->AttendFields()->find('Name', $name)) {
                         if (is_array($value)) {
                             $attendance->Fields()->add($attendField, [
-                                'Value' => json_encode($value)
+                                'Value' => empty($value) ? '' : json_encode($value)
                             ]);
                         } else {
                             $attendance->Fields()->add($attendField, [
