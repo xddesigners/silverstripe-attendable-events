@@ -12,6 +12,7 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\Security\Permission;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendeesOverview;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendFields;
@@ -91,6 +92,21 @@ class EventPageExtension extends DataExtension
             return EventAttendance::get()->filter(['EventDateID' => $dateTimeIDs]); //->Sort("\"Status\" ASC, \"EventDate\".\"StartDate\" ASC");
         }
         return EventAttendance::get()->filter(['ID' => -1]);
+    }
+
+    public function canDelete($member = null)
+    {
+        $dates = $this->owner->DateTimes();
+        if(  $dates->exists() ){
+            /** @var EventDateTime|EventDateTimeExtension $date */
+            foreach( $dates as $date ){
+                $attendees = $date->Attendees();
+                if( $attendees->exists() ){
+                    return false;
+                }
+            }
+        }
+        return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
     }
 
 }
