@@ -93,6 +93,12 @@ class AttendForm extends Form
             /** @var AttendField $attendField */
             foreach ($attendFields as $attendField) {
                 $field = $attendField->getFormField($members);
+
+                if (($attendField->Visibility == 'Members' && !$members->exists()) ||
+                    ($attendField->Visibility == 'Guests' && $members->exists())) {
+                    continue;
+                }
+                
                 $fields->add($field);
                 if ($attendField->Required) {
                     if (get_class($field) == CompositeField::class) {
