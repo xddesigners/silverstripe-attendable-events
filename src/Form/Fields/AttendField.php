@@ -21,7 +21,8 @@ class AttendField extends DataObject
         'Name' => 'Varchar',
         'Title' => 'Varchar',
         'Sort' => 'Int',
-        'Required' => 'Boolean'
+        'Required' => 'Boolean',
+        'Visibility' => 'Enum("All,Members,Guests","All")'
     ];
 
     private static $has_one = [
