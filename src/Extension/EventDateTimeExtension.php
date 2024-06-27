@@ -4,6 +4,7 @@ namespace XD\AttendableEvents\Extension;
 
 use Exception;
 use LeKoala\ExcelImportExport\ExcelGridFieldExportButton;
+use LeKoala\ExcelImportExport\ExcelImportExport;
 use SilverShop\HasOneField\HasOneButtonField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Forms\CheckboxField;
@@ -115,7 +116,13 @@ class EventDateTimeExtension extends DataExtension
             $exportButton = $confirmedAttendeeGrid->getConfig()->getComponentByType(ExcelGridFieldExportButton::class);
             /** @var EventAttendance $attendee */
             $attendee = $this->owner->ConfirmedAttendees()->first();
-            $columns = $attendee->config()->get('exported_fields');
+
+            if( $attendee->hasMethod('exportedFields') ){
+                $columns = $attendee->exportedFields();
+            } else {
+                $columns = $attendee->config()->get('exported_fields');
+            }
+
             $exportButton->setExportColumns($columns);
         }
 

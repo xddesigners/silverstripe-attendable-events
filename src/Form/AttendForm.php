@@ -383,8 +383,8 @@ class AttendForm extends Form
 
             if (isset($data['AttendField'])) {
                 // link to fields so we can calculate field option availability
-                foreach ($data['AttendField'] as $name => $value) {
-                    if ($attendField = $event->AttendFields()->find('Name', $name)) {
+                foreach ($data['AttendField'] as $id => $value) {
+                    if ($attendField = $event->AttendFields()->find('ID', $id)) {
                         if (is_array($value)) {
                             $attendance->Fields()->add($attendField, [
                                 'Value' => json_encode($value)

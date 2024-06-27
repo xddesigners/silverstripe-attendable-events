@@ -61,7 +61,8 @@ class AttendField extends DataObject
 
     public function getFieldName()
     {
-        return "AttendField[{$this->Name}]";
+        return "AttendField[{$this->ID}]";
+//        return "AttendField[{$this->Name}]";
     }
 
     public function canCreate($member = null, $context = [])

@@ -3,6 +3,7 @@
 namespace XD\AttendableEvents\Model;
 
 use SilverStripe\Control\Email\Email;
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
@@ -16,11 +17,22 @@ use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\Events\Model\EventDateTime;
 use XD\Events\Model\EventPage;
 
+
+use SilverStripe\Forms\TextareaField;
+use SilverStripe\Forms\TextField;
+
 /**
- * Class EventAttendance
- * @package XD\AttendableEvents\Model
- * @method Member Member
- * @method EventDateTime EventDate
+ * @property string $Status
+ * @property DBDatetime $WaitingListConfirmationEmailSent
+ * @property DBDatetime $EventConfirmationEmailSent
+ * @property string $Name
+ * @property string $Email
+ * @property string $Phone
+ * @property string $Organisation
+ *
+ * @method Member Member()
+ * @method EventDateTime EventDate()
+ * @method ManyManyList|AttendField[] Fields()
  */
 class EventAttendance extends DataObject
 {
@@ -52,7 +64,7 @@ class EventAttendance extends DataObject
     ];
 
     private static $summary_fields = [
-        'StatusNice' => 'Status', 
+        'StatusNice' => 'Status',
         'Title',
         'EventDate.StartDate' => 'Start',
         'EventConfirmationEmailSent',
@@ -62,11 +74,26 @@ class EventAttendance extends DataObject
     private static $exported_fields = [
         'StatusNice' => 'Status',
         'AttendeeName' => 'Naam',
-        'AttendeeEmail' => 'Email', 
+        'AttendeeEmail' => 'Email',
         'AttendeePhone' => 'Telefoon',
         'EventDate.StartDate' => 'EventDate',
-        'ExtraFields' => 'Extra velden'
+//        'ExtraFields' => 'Extra velden',
     ];
+
+    public function exportedFields()
+    {
+        $exportedFields = Config::inst()->get(__CLASS__, 'exported_fields');
+
+        // dynamicly add extra fields as columns
+        $fields = $this->Fields();
+        if ($fields->exists()) {
+            foreach ($fields as $field) {
+                $key = 'AttendField_' . $field->ID;
+                $exportedFields[$key] = $field->Title;
+            }
+        }
+        return $exportedFields;
+    }
 
     public function getStatusNice()
     {
@@ -77,6 +104,7 @@ class EventAttendance extends DataObject
     public function getCMSFields()
     {
         $fields = parent::getCMSFields();
+
         $fields->removeByName(['MemberID', 'EventDateID', 'Fields']);
         $fields->addFieldsToTab('Root.Main', [
             DropdownField::create('MemberID', _t(__CLASS__ . '.Member', 'Deelnemer'), Member::get()->map()->toArray())->setEmptyString(_t(__CLASS__ . '.ChooseMember', 'Choose member'))
@@ -86,7 +114,7 @@ class EventAttendance extends DataObject
             'Status',
             _t(__CLASS__ . '.Status', 'Status'),
             array_map(
-                fn($status) => _t(__CLASS__ . ".Status_{$status}", $status), 
+                fn($status) => _t(__CLASS__ . ".Status_{$status}", $status),
                 $this->dbObject('Status')->enumValues()
             )
         ));
@@ -101,13 +129,16 @@ class EventAttendance extends DataObject
             }
         }
 
+
         // todo interface for adding attendee
         // member or outsider
+        /** @var AttendField $attendeeField */
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
+
             $values = json_decode($attendeeField->Value ?? '', true);
             if ($values && is_array($values)) {
-                foreach($values as $key => $val) {
+                foreach ($values as $key => $val) {
                     $itemField = clone $field;
                     $name = $itemField->getName();
                     $itemField->setName($name . "[$key]");
@@ -152,9 +183,9 @@ class EventAttendance extends DataObject
             return $value;
         }
 
-        if( strpos($fieldName, 'AttendField')!==false ) {
-            $id = explode('_',$fieldName)[1];
-            if( $field = $this->Fields()->filter(['AttendableEvents_AttendFieldID'=>$id])->first()){
+        if (strpos($fieldName, 'AttendField') !== false) {
+            $id = explode('_', $fieldName)[1];
+            if ($field = $this->Fields()->filter(['AttendableEvents_AttendFieldID' => $id])->first()) {
                 return $field->Value;
             }
 
@@ -165,6 +196,15 @@ class EventAttendance extends DataObject
     {
         parent::onBeforeWrite();
 
+        // set member fields to base record fields
+        $member = $this->Member();
+        if ($member->exists()) {
+            $this->Name = $member->getTitle();
+            $this->Email = $member->Email;
+            $this->Phone = !empty($member->Telephone) ? $member->Telephone : '';
+            $this->Organisation = !empty($member->OrganisationName) ? $member->OrganisationName : '';
+        }
+
         // Update any changes to extra fields data
         if ($this->exists()) {
             $this->updateExtraFields();
@@ -174,9 +214,11 @@ class EventAttendance extends DataObject
     public function updateExtraFields()
     {
         if ($this->Fields()->count()) {
+            /** @var AttendField $attendField */
             foreach ($this->Fields() as $attendField) {
                 $name = $attendField->getFieldName();
                 $value = $this->{$name};
+
                 if (is_array($value)) {
                     $value = json_encode($value);
                 }
@@ -206,7 +248,7 @@ class EventAttendance extends DataObject
             $values = json_decode($value ?? '', true);
             if ($values && is_array($values)) {
                 foreach ($values as $key => $val) {
-                    $extraFields[] = "$title: $val";        
+                    $extraFields[] = "$title: $val";
                 }
             } else {
                 $extraFields[] = "$title: $value";
@@ -295,7 +337,7 @@ class EventAttendance extends DataObject
         $email->setBCC($from);
 
         $days = $this->EventDate()->DayDateTimes();
-        if( $days->exists() && $days->Count() > 1 ){
+        if ($days->exists() && $days->Count() > 1) {
             $subject = _t(__CLASS__ . '.WaitingListConfirmationEmailSubject', 'Bedankt voor je inschrijving voor {event}', null, [
                 'event' => $this->EventDate()->Event()->Title
             ]);
@@ -354,7 +396,7 @@ class EventAttendance extends DataObject
         $email->setBCC($from);
 
         $days = $this->EventDate()->DayDateTimes();
-        if( $days->exists() && $days->Count() > 1 ){
+        if ($days->exists() && $days->Count() > 1) {
             $subject = _t(__CLASS__ . '.EventConfirmationEmailSubject', 'Jouw inschrijving voor {event} is bevestigd', null, [
                 'event' => $this->EventDate()->Event()->Title
             ]);
