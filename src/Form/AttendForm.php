@@ -26,6 +26,7 @@ use SilverStripe\Security\Security;
 use XD\AttendableEvents\Extension\Attendable;
 use XD\AttendableEvents\Extension\EventControllerExtension;
 use XD\AttendableEvents\Extension\EventDateTimeExtension;
+use XD\AttendableEvents\Extension\EventPageExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\AttendableEvents\Model\EventAttendance;
 use XD\Basic\Extensions\MemberExtension;
@@ -43,13 +44,14 @@ class AttendForm extends Form
     public function __construct(RequestHandler $controller)
     {
         /** @var EventPageController|EventControllerExtension $controller */
-        /** @var EventPage $event */
+        /** @var EventPage|EventPageExtension $event */
         $event = $controller->data();
         $dates = $controller->getAttendableDates();
         $dates = $controller->getUpcomingDates();
 
         // todo: create date fields
 
+        // if already signed up and logged in and no externals allowed do not show form
         $attendableDatesField = $this->createAttendableDatesField($dates);
         $fields = new FieldList([
             $attendableDatesField,

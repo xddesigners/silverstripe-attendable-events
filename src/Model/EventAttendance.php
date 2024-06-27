@@ -13,6 +13,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\View\ArrayData;
+use XD\AttendableEvents\Extension\EventPageExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\Events\Model\EventDateTime;
 use XD\Events\Model\EventPage;
@@ -208,6 +209,26 @@ class EventAttendance extends DataObject
         // Update any changes to extra fields data
         if ($this->exists()) {
             $this->updateExtraFields();
+        }
+    }
+
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+        // add Fields without values if none exist
+        $fields = $this->Fields();
+        if (!$fields->exists()) {
+            $eventDate = $this->EventDate();
+            if (!$eventDate) return;
+            /** @var Event|EventPageExtension $event */
+            $event = $eventDate->Event();
+
+            $attendFields = $event->AttendFields();
+            if ($attendFields->exists()) {
+                foreach ($attendFields as $attendField) {
+                    $this->Fields()->add($attendField->ID);
+                }
+            }
         }
     }
 
