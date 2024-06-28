@@ -217,7 +217,7 @@ class EventAttendance extends DataObject
         parent::onAfterWrite();
         // add Fields without values if none exist
         $fields = $this->Fields();
-        if (!$fields->exists()) {
+        if (!$fields->count() == 0) {
             $eventDate = $this->EventDate();
             if (!$eventDate) return;
             /** @var Event|EventPageExtension $event */
@@ -226,7 +226,7 @@ class EventAttendance extends DataObject
             $attendFields = $event->AttendFields();
             if ($attendFields->exists()) {
                 foreach ($attendFields as $attendField) {
-                    $this->Fields()->add($attendField->ID);
+                    $this->Fields()->add($attendField);
                 }
             }
         }

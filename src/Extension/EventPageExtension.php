@@ -12,13 +12,30 @@ use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\ORM\DataExtension;
+use SilverStripe\ORM\DB;
 use SilverStripe\Security\Permission;
+use XD\Events\Model\EventPage;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendeesOverview;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendFields;
 use XD\AttendableEvents\GridField\GridFieldConfig_EventDateTimes;
 use XD\AttendableEvents\Model\EventAttendance;
 
+/**
+ * Class EventPageExtension
+ * @package XD\AttendableEvents\Extension
+ *
+ * @property string ExternalTicketProvider
+ * @property int AttendeeLimit
+ * @property bool SkipWaitingList
+ * @property bool AllowExternalAttendees
+ * @property bool ExternalAttendeesSkipWaitingList
+ * @property string EventWaitingListConfirmationEmailContent
+ * @property string EventConfirmationEmailContent
+ * @property bool UnattendAllowed
+ * @property EventPage|EventPageExtension $owner
+ * @method HasManyList AttendFields()
+ */
 class EventPageExtension extends DataExtension
 {
     private static $db = [
@@ -39,9 +56,11 @@ class EventPageExtension extends DataExtension
     private static $defaults = [
         'AttendeeLimit' => -1
     ];
-    
+
     public function updateCMSFields(FieldList $fields)
     {
+
+        $this->syncAttendeeFields();
 
         $fields->removeByName(['DateTimes']);
 
@@ -63,7 +82,7 @@ class EventPageExtension extends DataExtension
 
         /** @var Tab $tab */
         $tab = $fields->fieldByName('Root.Date');
-        $tab->setTitle(_t(__CLASS__.'.Date','Dates'));
+        $tab->setTitle(_t(__CLASS__ . '.Date', 'Dates'));
 
         $fields->addFieldsToTab('Root.AttendForm', [
             GridField::create(
@@ -97,16 +116,54 @@ class EventPageExtension extends DataExtension
     public function canDelete($member = null)
     {
         $dates = $this->owner->DateTimes();
-        if(  $dates->exists() ){
+        if ($dates->exists()) {
             /** @var EventDateTime|EventDateTimeExtension $date */
-            foreach( $dates as $date ){
+            foreach ($dates as $date) {
                 $attendees = $date->Attendees();
-                if( $attendees->exists() ){
+                if ($attendees->exists()) {
                     return false;
                 }
             }
         }
         return Permission::check('CMS_ACCESS_CMSMain', 'any', $member);
+    }
+
+    public function syncAttendeeFields()
+    {
+        // get fields
+        $attendFields = $this->owner->AttendFields();
+        if (!$attendFields->exists()) return;
+
+        // get all attendances
+        $dateTimes = $this->owner->DateTimes();
+        if (!$dateTimes->exists()) return;
+        $dateTimeIDs = $dateTimes->columnUnique();
+
+        // get all eventAttendances
+        $attendances = EventAttendance::get()->filter(['EventDateID' => $dateTimeIDs]);
+        if( !$attendances->exists() ) return;
+
+        foreach( $attendances as $attendance ){
+            // loop fields add fields if necesary
+            foreach( $attendFields as $attendField ){
+                $field = $attendance->Fields()->filter(['ID'=>$attendField->ID])->first();
+                if( !$field ){
+                    // $attendance->Fields()->add($attendField);
+                    $maxResult = DB::query('SELECT MAX(ID) AS max_id FROM AttendableEvents_EventAttendance_Fields;');
+                    $firstResult = $maxResult->first();
+                    $maxID = ((int) $firstResult['max_id'])+1;
+                    DB::query("INSERT INTO AttendableEvents_EventAttendance_Fields (ID, AttendableEvents_EventAttendanceID, AttendableEvents_AttendFieldID) VALUES ( $maxID, $attendance->ID, $attendField->ID);");
+                }
+            }
+        }
+
+    }
+
+    public function onAfterWrite()
+    {
+        parent::onAfterWrite();
+        // sync all EventAttendances with AttendFields if changed
+        $this->syncAttendeeFields();
     }
 
 }
