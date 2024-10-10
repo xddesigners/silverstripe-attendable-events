@@ -46,4 +46,20 @@ class AttendFieldOption extends DataObject
             $this->Title = $this->Value;
         }
     }
+
+    public function canView($member = null)
+    {
+        return $this->Field()->canView($member);
+    }
+
+    public function canEdit($member = null)
+    {
+        return $this->Field()->canEdit($member);
+    }
+
+    public function canDelete($member = null)
+    {
+        return $this->Field()->canEdit($member);
+    }
+    
 }
