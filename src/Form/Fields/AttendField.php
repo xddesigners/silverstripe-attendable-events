@@ -85,4 +85,20 @@ class AttendField extends DataObject
     {
         $this->extend('onAfterAttend', $value, $attendace);
     }
+
+    public function canView($member = null)
+    {
+        return $this->Event()->canView($member);
+    }
+
+    public function canEdit($member = null)
+    {
+        return $this->Event()->canEdit($member);
+    }
+
+    public function canDelete($member = null)
+    {
+        return $this->Event()->canEdit($member);
+    }
+    
 }
