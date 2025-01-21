@@ -93,6 +93,7 @@ class EventAttendance extends DataObject
                 $exportedFields[$key] = $field->Title;
             }
         }
+
         return $exportedFields;
     }
 
