@@ -32,6 +32,25 @@ use XD\Events\Model\EventDateTime;
  * @property EventDateTime|EventDateTimeExtension $owner
  * @property Boolean $SkipWaitingList
  */
+/**
+ * Class EventDateTimeExtension
+ * @package XD\AttendableEvents\Extension
+ * @property EventDateTime|EventDateTimeExtension $owner
+ * @property Boolean $SkipWaitingList
+ * @property Boolean $ExternalAttendeesSkipWaitingList
+ * @property Boolean $ShowAsFull
+ * @property Boolean $NoDate
+ * @property Int $AttendeeLimit
+ * @property Int $AttendeeCount
+ * @property Int $ConfirmedAttendeeCount
+ * @property EventLocation $Location
+ * @property EventAttendance $Attendees
+ * @property EventDayDateTime $DayDateTimes
+ * @method EventDateTime|EventDateTimeExtension Event()
+ * @method EventLocation Location()
+ * @method EventAttendance Attendees()
+ * @method EventDayDateTime DayDateTimes()
+ */
 class EventDateTimeExtension extends DataExtension
 {
     private static $db = [
@@ -39,6 +58,7 @@ class EventDateTimeExtension extends DataExtension
         'SkipWaitingList' => 'Boolean',
         'ExternalAttendeesSkipWaitingList' => 'Boolean',
         'ShowAsFull' => 'Boolean',
+        'NoDate' => 'Boolean',
     ];
 
     private static $has_one = [
@@ -63,7 +83,7 @@ class EventDateTimeExtension extends DataExtension
     public function updateCMSFields(FieldList $fields)
     {
         $fields->removeByName(['Title', 'AttendeeLimit', 'ShowAsFull', 'SkipWaitingList', 'AutoSendConfirmation', 'ExternalTicketProvider',
-            'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes', 'ExternalAttendeesSkipWaitingList']);
+            'EventID', 'AllDay', 'StartTime', 'EndTime', 'EndDate', 'LocationID', 'Pinned', 'PinnedForever', 'DayDateTimes', 'ExternalAttendeesSkipWaitingList', 'NoDate']);
 
         if ($this->owner->ID) {
             $fields->removeByName('StartDate');
@@ -85,8 +105,10 @@ class EventDateTimeExtension extends DataExtension
                 CheckboxField::create('SkipWaitingList', _t(__CLASS__ . '.SkipWaitingList', 'Place logged in attendees directly in confirmed list.'))
                     ->setDescription(_t(__CLASS__ . '.SkipWaitingListDescription', 'Attendees will receive an automatic confirmation email.')),
                 CheckboxField::create('ExternalAttendeesSkipWaitingList', _t(__CLASS__ . '.ExternalAttendeesSkipWaitingList', 'Place external attendees directly in confirmed list.')),
+                CheckboxField::create('NoDate', _t(__CLASS__ . '.NoDate', 'Event heeft geen datum')),
                 $locationField
             ])->setTitle(_t(__CLASS__ . '.EventDetails', 'Event details')),
+
             CompositeField::create([
                 CheckboxField::create('Pinned', _t(__CLASS__ . '.Pinned', 'Pinned')),
             ])->setTitle(_t(__CLASS__ . '.EventOptions', 'Event options')),
@@ -299,6 +321,11 @@ class EventDateTimeExtension extends DataExtension
                 $this->owner->EndTime = $firstDate->EndTime;
             }
         }
+        if($this->owner->NoDate){
+            $this->owner->StartDate = null;
+            $this->owner->StartTime = null;
+            $this->owner->EndTime = null;
+        }
 
     }
 
@@ -306,7 +333,7 @@ class EventDateTimeExtension extends DataExtension
     {
         parent::onAfterWrite();
         $days = $this->owner->DayDateTimes();
-        if (!$days->exists() && $this->owner->StartDate) {
+        if (!$days->exists() && $this->owner->StartDate && !$this->owner->NoDate) {
             // auto create
             $day = new EventDayDateTime();
             $day->EventDateTimeID = $this->owner->ID;

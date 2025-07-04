@@ -16,7 +16,7 @@ class AttendOptionsetField extends AttendField
     private static $fieldType = OptionsetField::class;
 
     private static $has_many = [
-        'Options' => AttendFieldOption::class
+        'Options' => AttendFieldOption::class,
     ];
 
     public function getCMSFields()
@@ -30,7 +30,7 @@ class AttendOptionsetField extends AttendField
                     _t(__CLASS__ . '.Options', 'Options'),
                     $this->Options(),
                     GridFieldConfig_AttendFieldOptions::create()
-                )
+                ),
             ]);
         }
         return $fields;
@@ -50,10 +50,16 @@ class AttendOptionsetField extends AttendField
 
             $field->setValue($value);
         }
-        $disabledItems = $this->owner->Options()->filter('Disabled', true);
-        if ($disabledItems->exists()) {
-            $field->setDisabledItems($disabledItems->column('Value'));
+
+        // check if accessed from cms
+        $controller = \SilverStripe\Control\Controller::curr();
+        if (get_class($controller) != 'SilverStripe\CMS\Controllers\CMSPageEditController') {
+            $disabledItems = $this->owner->Options()->filter('Disabled', true);
+            if ($disabledItems->exists()) {
+                $field->setDisabledItems($disabledItems->column('Value'));
+            }
         }
+
         $this->extend('updateFormField', $field);
         return $field;
     }
