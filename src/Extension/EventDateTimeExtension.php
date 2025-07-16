@@ -118,7 +118,7 @@ class EventDateTimeExtension extends DataExtension
             $attendeeGrid = GridField::create(
                 'Attendees',
                 _t(__CLASS__ . '.Attendees', 'Aanmeldingen'),
-                $this->owner->Attendees()->exclude(['Status' => 'Confirmed']),
+                $this->UnconfirmedAttendees(),
                 GridFieldConfig_EventAttendees::create()->removeComponentsByType(GridFieldAddNewButton::class)
             )->addExtraClass('compact-grid-field'),
             LiteralField::create('attendee-seperator', '<hr>'),
@@ -132,6 +132,21 @@ class EventDateTimeExtension extends DataExtension
 
         $tab = $fields->fieldByName('Root.Attendees');
         $tab->setTitle(_t(__CLASS__ . '.Attendees', 'Attendees'));
+
+        if ($this->owner->UnconfirmedAttendees()->exists()) {
+            /** @var ExcelGridFieldExportButton $exportButton */
+            $exportButton = $attendeeGrid->getConfig()->getComponentByType(ExcelGridFieldExportButton::class);
+            /** @var EventAttendance $attendee */
+            $attendee = $this->owner->UnconfirmedAttendees()->first();
+
+            if( $attendee->hasMethod('exportedFields') ){
+                $columns = $attendee->exportedFields();
+            } else {
+                $columns = $attendee->config()->get('exported_fields');
+            }
+
+            $exportButton->setExportColumns($columns);
+        }
 
         if ($this->owner->ConfirmedAttendees()->exists()) {
             /** @var ExcelGridFieldExportButton $exportButton */
@@ -148,6 +163,7 @@ class EventDateTimeExtension extends DataExtension
             $exportButton->setExportColumns($columns);
         }
 
+
         // $fields->addFieldsToTab(
         //     'Root.Hosts', [
         //         GridField::create(
@@ -160,6 +176,11 @@ class EventDateTimeExtension extends DataExtension
         // );
 
         return $fields;
+    }
+
+    public function UnconfirmedAttendees()
+    {
+        return $this->owner->Attendees()->exclude(['Status' => 'Confirmed']);
     }
 
     /**
