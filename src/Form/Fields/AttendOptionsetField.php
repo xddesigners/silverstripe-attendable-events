@@ -52,8 +52,7 @@ class AttendOptionsetField extends AttendField
         }
 
         // check if accessed from cms
-        $controller = \SilverStripe\Control\Controller::curr();
-        if (get_class($controller) != 'SilverStripe\CMS\Controllers\CMSPageEditController') {
+        if (\SilverStripe\Control\Controller::has_curr() && !(\SilverStripe\Control\Controller::curr() instanceof \SilverStripe\Admin\LeftAndMain)){
             $disabledItems = $this->owner->Options()->filter('Disabled', true);
             if ($disabledItems->exists()) {
                 $field->setDisabledItems($disabledItems->column('Value'));
@@ -63,4 +62,7 @@ class AttendOptionsetField extends AttendField
         $this->extend('updateFormField', $field);
         return $field;
     }
+
+
+
 }

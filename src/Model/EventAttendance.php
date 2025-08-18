@@ -137,7 +137,6 @@ class EventAttendance extends DataObject
         /** @var AttendField $attendeeField */
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
-
             $values = json_decode($attendeeField->Value ?? '', true);
             if ($values && is_array($values)) {
                 foreach ($values as $key => $val) {
