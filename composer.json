@@ -11,7 +11,7 @@
     }
   ],
   "require": {
-    "silverstripe/cms": "^5.0",
+    "silverstripe/cms": "^6.0",
     "xddesigners/silverstripe-events": "*"
   },
   "autoload": {
