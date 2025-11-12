@@ -11,7 +11,7 @@ use SilverStripe\Forms\NumericField;
 use SilverStripe\Forms\Tab;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TreeDropdownField;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Security\Permission;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\AttendableEvents\GridField\GridFieldConfig_AttendeesOverview;
@@ -19,7 +19,7 @@ use XD\AttendableEvents\GridField\GridFieldConfig_AttendFields;
 use XD\AttendableEvents\GridField\GridFieldConfig_EventDateTimes;
 use XD\AttendableEvents\Model\EventAttendance;
 
-class EventPageExtension extends DataExtension
+class EventPageExtension extends Extension
 {
     private static $db = [
         'ExternalTicketProvider' => 'Varchar',

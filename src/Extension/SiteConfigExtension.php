@@ -4,7 +4,7 @@ namespace XD\AttendableEvents\Extensions;
 
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\SiteConfig\SiteConfig;
 
 /**
@@ -12,7 +12,7 @@ use SilverStripe\SiteConfig\SiteConfig;
  * Extension to modify SiteConfig
  * @property SiteConfig|SiteConfigExtension owner
  */
-class SiteConfigExtension extends DataExtension
+class SiteConfigExtension extends Extension
 {
     private static $db = [
         'EventWaitingListConfirmationEmailContent' => 'HTMLText',

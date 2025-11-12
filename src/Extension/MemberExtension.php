@@ -2,7 +2,7 @@
 
 namespace XD\AttendableEvents\Extensions;
 
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Security\Member;
 use XD\AttendableEvents\Model\EventAttendance;
 
@@ -11,7 +11,7 @@ use XD\AttendableEvents\Model\EventAttendance;
  * @package XD\AttendableEvents\Extensions
  * @property Member|MemberExtension $owner
  */
-class MemberExtension extends DataExtension
+class MemberExtension extends Extension
 {
 
     private static $has_many = [

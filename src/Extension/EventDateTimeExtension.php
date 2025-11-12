@@ -16,7 +16,7 @@ use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\Forms\NumericField;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -37,7 +37,7 @@ use XD\Events\Model\EventDateTime;
  * @property EventDateTime|EventDateTimeExtension $owner
  * @property Boolean $SkipWaitingList
  */
-class EventDateTimeExtension extends DataExtension
+class EventDateTimeExtension extends Extension
 {
     private static $db = [
         'Title' => 'Varchar',
