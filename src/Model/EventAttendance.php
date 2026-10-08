@@ -63,7 +63,10 @@ class EventAttendance extends DataObject
 
     private static $many_many_extraFields = [
         'Fields' => [
-            'Value' => 'Varchar'
+            // Text (not Varchar/255): multi-select fields (CheckboxSetField/ListboxField) store their
+            // selection as a JSON array, which overflows 255 chars with a few longer options and then
+            // gets silently truncated by MySQL -> invalid JSON -> value reads back empty.
+            'Value' => 'Text'
         ]
     ];
 
