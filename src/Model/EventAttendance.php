@@ -2,9 +2,11 @@
 
 namespace XD\AttendableEvents\Model;
 
+use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\MultiSelectField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\FieldType\DBDatetime;
@@ -138,6 +140,16 @@ class EventAttendance extends DataObject
         foreach ($this->Fields() as $attendeeField) {
             $field = $attendeeField->getFormField();
             $values = json_decode($attendeeField->Value ?? '', true);
+
+            // Multi-select fields (CheckboxSetField/ListboxField) take the whole stored array as their
+            // value. getFormField() already loads it; add the field as-is instead of cloning per value
+            // (the clone-per-key loop below is only correct for keyed scalar fields such as the diet field).
+            if ($field instanceof MultiSelectField) {
+                $field->setValue(is_array($values) ? $values : $attendeeField->Value);
+                $fields->addFieldToTab('Root.Main', $field);
+                continue;
+            }
+
             if ($values && is_array($values)) {
                 foreach ($values as $key => $val) {
                     $itemField = clone $field;
@@ -235,18 +247,30 @@ class EventAttendance extends DataObject
     public function updateExtraFields()
     {
         if ($this->Fields()->count()) {
+            // CheckboxSetField/ListboxField values are never written onto the record by
+            // MultiSelectField::saveInto() (it only writes when the record hasField()), so read the
+            // posted values straight from the request as a fallback.
+            $request = Controller::has_curr() ? Controller::curr()->getRequest() : null;
+            $postedFields = ($request && $request->isPOST()) ? $request->postVar('AttendField') : null;
+
             /** @var AttendField $attendField */
             foreach ($this->Fields() as $attendField) {
                 $name = $attendField->getFieldName();
                 $value = $this->{$name};
+                $changed = $this->isChanged($name);
+
+                if (!$changed && is_array($postedFields) && array_key_exists($attendField->ID, $postedFields)) {
+                    $value = $postedFields[$attendField->ID];
+                    $changed = true;
+                }
 
                 if (is_array($value)) {
                     $value = json_encode($value);
                 }
 
-                if ($this->isChanged($name)) {
+                if ($changed) {
                     $this->Fields()->add($attendField, [
-                        'Value' => $this->{$name}
+                        'Value' => $value
                     ]);
                 }
             }
