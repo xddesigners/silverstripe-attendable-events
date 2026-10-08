@@ -17,6 +17,6 @@ class GridFieldConfig_AttendeesOverview extends GridFieldConfig_RecordViewer
     public function __construct($itemsPerPage = null)
     {
         parent::__construct($itemsPerPage);
-        $this->addComponent(new ExcelGridFieldExportButton('buttons-before-left'));
+        $this->addComponent(new StableExcelGridFieldExportButton('buttons-before-left'));
     }
 }

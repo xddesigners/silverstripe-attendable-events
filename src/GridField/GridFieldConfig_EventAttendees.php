@@ -21,7 +21,7 @@ class GridFieldConfig_EventAttendees extends GridFieldConfig_RecordEditor
     public function __construct($itemsPerPage = null)
     {
         parent::__construct($itemsPerPage);
-        $this->addComponent(new ExcelGridFieldExportButton('buttons-before-left'));
+        $this->addComponent(new StableExcelGridFieldExportButton('buttons-before-left'));
         $this->addComponent($managed = new BulkManager());
         $this->removeComponentsByType( GridField_ActionMenu::class);
         $managed->addBulkAction(MoveAttendeesHandler::class);
