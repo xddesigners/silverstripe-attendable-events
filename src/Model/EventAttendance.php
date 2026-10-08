@@ -180,22 +180,34 @@ class EventAttendance extends DataObject
     {
         $parsed = new ArrayList();
         foreach ($this->Fields() as $attendeeField) {
-            $values = json_decode($attendeeField->Value ?? '', true);
-            if (is_array($values)) {
-                // Field is an multivalue field
-                $value = implode(', ', $values);
-            } else {
-                // Field is single value
-                $value = $attendeeField->Value;
-            }
-
             $parsed->push(new ArrayData([
                 'Title' => $attendeeField->Title,
-                'Value' => $value
+                'Value' => self::formatFieldValue($attendeeField->Value)
             ]));
         }
 
         return $parsed;
+    }
+
+    /**
+     * Formatteer een opgeslagen AttendField-waarde naar een leesbare string.
+     * Multi-select wordt als JSON bewaard — array ["a","b"] of (ouder) object {"a":"a"} — en wordt
+     * teruggegeven als de geselecteerde waarden, gescheiden door " | ". Single-value / vrije tekst (en
+     * eventueel nog afgekapte, ongeldige JSON) blijft ongewijzigd.
+     */
+    public static function formatFieldValue($raw)
+    {
+        $raw = (string) ($raw ?? '');
+        if ($raw === '') {
+            return $raw;
+        }
+
+        $decoded = json_decode($raw, true);
+        if (is_array($decoded)) {
+            return implode(' | ', array_values($decoded));
+        }
+
+        return $raw;
     }
 
     public function relField($fieldName)
@@ -209,7 +221,8 @@ class EventAttendance extends DataObject
         if (strpos($fieldName, 'AttendField') !== false) {
             $id = explode('_', $fieldName)[1];
             if ($field = $this->Fields()->filter(['AttendableEvents_AttendFieldID' => $id])->first()) {
-                return $field->Value;
+                // Lever een leesbare waarde voor de export (geen rauwe JSON).
+                return self::formatFieldValue($field->Value);
             }
 
         }
