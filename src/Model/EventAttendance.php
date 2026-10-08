@@ -6,6 +6,7 @@ use SilverStripe\Control\Controller;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\DropdownField;
+use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\MultiSelectField;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\ORM\DataObject;
@@ -147,6 +148,12 @@ class EventAttendance extends DataObject
             if ($field instanceof MultiSelectField) {
                 $field->setValue(is_array($values) ? $values : $attendeeField->Value);
                 $fields->addFieldToTab('Root.Main', $field);
+                // Marker so updateExtraFields() can tell "all boxes unchecked" (a multi-select posts
+                // nothing when empty) apart from the field simply not being on the form.
+                $fields->addFieldToTab(
+                    'Root.Main',
+                    HiddenField::create('AttendFieldPresent[' . $attendeeField->ID . ']', '', 1)
+                );
                 continue;
             }
 
@@ -250,8 +257,9 @@ class EventAttendance extends DataObject
             // CheckboxSetField/ListboxField values are never written onto the record by
             // MultiSelectField::saveInto() (it only writes when the record hasField()), so read the
             // posted values straight from the request as a fallback.
-            $request = Controller::has_curr() ? Controller::curr()->getRequest() : null;
-            $postedFields = ($request && $request->isPOST()) ? $request->postVar('AttendField') : null;
+            $isPost = Controller::has_curr() && Controller::curr()->getRequest()->isPOST();
+            $postedFields = $isPost ? Controller::curr()->getRequest()->postVar('AttendField') : null;
+            $presentFields = $isPost ? Controller::curr()->getRequest()->postVar('AttendFieldPresent') : null;
 
             /** @var AttendField $attendField */
             foreach ($this->Fields() as $attendField) {
@@ -261,6 +269,10 @@ class EventAttendance extends DataObject
 
                 if (!$changed && is_array($postedFields) && array_key_exists($attendField->ID, $postedFields)) {
                     $value = $postedFields[$attendField->ID];
+                    $changed = true;
+                } elseif (!$changed && is_array($presentFields) && array_key_exists($attendField->ID, $presentFields)) {
+                    // Multi-select field was on the form but nothing is checked -> cleared
+                    $value = null;
                     $changed = true;
                 }
 
