@@ -14,13 +14,13 @@ use SilverStripe\Forms\FormAction;
 use SilverStripe\Forms\HeaderField;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\RequiredFields;
+use SilverStripe\Forms\Validation\RequiredFieldsValidator;
 use SilverStripe\Forms\TextField;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\ORM\ManyManyList;
-use SilverStripe\ORM\ValidationResult;
+use SilverStripe\Core\Validation\ValidationResult;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use XD\AttendableEvents\Extension\Attendable;
@@ -76,7 +76,7 @@ class AttendForm extends Form
             $fields->push($memberFields);
         }
 
-        $requiredFields = new RequiredFields(['AttendableDates']);
+        $requiredFields = new RequiredFieldsValidator(['AttendableDates']);
         if (isset($memberFields) && $memberFields instanceof CompositeField) {
             foreach ($memberFields->getChildren()->column('Name') as $required) {
                 $requiredFields->addRequiredField($required);
