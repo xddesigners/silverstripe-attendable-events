@@ -361,6 +361,9 @@ class EventAttendance extends DataObject
 
         $from = Email::config()->get('admin_email');
         $email = new Email($from, $to);
+        if (file_exists(BASE_PATH . '/app/images/mail-logo.png')) {
+            $email->embedFromPath(BASE_PATH . '/app/images/mail-logo.png', 'logo');
+        }
 
 
         $days = $this->EventDate()->DayDateTimes();
@@ -433,6 +436,9 @@ class EventAttendance extends DataObject
 
         $from = Email::config()->get('admin_email');
         $email = new Email($from, $to);
+        if (file_exists(BASE_PATH . '/app/images/mail-logo.png')) {
+            $email->embedFromPath(BASE_PATH . '/app/images/mail-logo.png', 'logo');
+        }
 
         $days = $this->EventDate()->DayDateTimes();
         if( $days->exists() && $days->Count() > 1 ){
@@ -504,6 +510,9 @@ class EventAttendance extends DataObject
 
         $from = Email::config()->get('admin_email');
         $email = new Email($from, $to);
+        if (file_exists(BASE_PATH . '/app/images/mail-logo.png')) {
+            $email->embedFromPath(BASE_PATH . '/app/images/mail-logo.png', 'logo');
+        }
         $email->setBCC($from);
 
         $days = $this->EventDate()->DayDateTimes();
@@ -567,6 +576,9 @@ class EventAttendance extends DataObject
 
         $from = Email::config()->get('admin_email');
         $email = new Email($from, $to);
+        if (file_exists(BASE_PATH . '/app/images/mail-logo.png')) {
+            $email->embedFromPath(BASE_PATH . '/app/images/mail-logo.png', 'logo');
+        }
         $email->setBCC($from);
 
         $days = $this->EventDate()->DayDateTimes();

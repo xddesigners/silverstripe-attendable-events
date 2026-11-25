@@ -21,7 +21,7 @@
                                 <tr style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;">
                                     <td class="content-block title-block" style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;vertical-align: top;font-size: 14px;padding: 0 0 20px;text-align: center;"  colspan="2">
                                         <a href="$BaseURL" style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;color: #002e67;text-decoration: underline;">
-                                            <img src="{$AbsoluteBaseUrl}/app/images/mail-logo.png" alt="$SiteConfig.Title" width="135" height="127" style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;max-width: 100%;">
+                                            <img src="cid:logo" alt="$SiteConfig.Title" width="170" style="margin: 0;font-family: &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif;box-sizing: border-box;max-width: 100%;">
                                         </a>
                                     </td>
                                 </tr>

@@ -161,6 +161,9 @@ class EventDateTimeExtension extends Extension
         $to = $currentUser->Email;
         $from = Email::config()->get('admin_email');
         $email = new Email($from, $to);
+        if (file_exists(BASE_PATH . '/app/images/mail-logo.png')) {
+            $email->embedFromPath(BASE_PATH . '/app/images/mail-logo.png', 'logo');
+        }
 
         $event = $this->owner->Event();
         $subject = _t(__CLASS__ . '.EventConfirmationEmailSubject', 'Jouw inschrijving voor {event} op {date} is bevestigd', null, [
