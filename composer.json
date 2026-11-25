@@ -12,10 +12,7 @@
   ],
   "require": {
     "silverstripe/cms": "^6.0",
-    "xddesigners/silverstripe-events": "*",
-    "colymba/gridfield-bulk-editing-tools": "^5.0",
-    "symbiote/silverstripe-gridfieldextensions": "^5.0",
-    "lekoala/silverstripe-excel-import-export": "*"
+    "xddesigners/silverstripe-events": "*"
   },
   "extra": {
     "branch-alias": {
