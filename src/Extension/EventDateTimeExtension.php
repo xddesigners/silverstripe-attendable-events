@@ -185,7 +185,7 @@ class EventDateTimeExtension extends Extension
             'Status' => 'Confirmed',
         ]);
 
-        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventConfirmationEmail.ss');
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventConfirmationEmail');
         $email->setData($fakeAttendance);
         $email->addData('Body', $body);
 

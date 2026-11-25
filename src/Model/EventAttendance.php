@@ -396,7 +396,7 @@ class EventAttendance extends DataObject
             $body .= '<p><a href="' . $link . '" target="_blank">Open formulier &raquo;</a></p>';
         }
 
-        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventEvaluationEmail.ss');
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventEvaluationEmail');
         $email->setData($this);
         $email->addData('Body', $body);
 
@@ -467,7 +467,7 @@ class EventAttendance extends DataObject
             $body .= '<p><a href="' . $link . '" target="_blank">Open formulier &raquo;</a></p>';
         }
 
-        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventIntakeEmail.ss');
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventIntakeEmail');
         $email->setData($this);
         $email->addData('Body', $body);
 
@@ -530,7 +530,7 @@ class EventAttendance extends DataObject
         }
 
 
-        $email->setHTMLTemplate('XD\AttendableEvents\Email\WaitingListConfirmationEmail.ss');
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\WaitingListConfirmationEmail');
         $email->setData($this);
         $email->addData('Body', $body);
 
@@ -592,7 +592,7 @@ class EventAttendance extends DataObject
             $body = $event->EventConfirmationEmailContent;
         }
 
-        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventConfirmationEmail.ss');
+        $email->setHTMLTemplate('XD\AttendableEvents\Email\EventConfirmationEmail');
         $email->setData($this);
         $email->addData('Body', $body);
 
