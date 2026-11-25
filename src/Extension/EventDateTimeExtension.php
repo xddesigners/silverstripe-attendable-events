@@ -192,7 +192,13 @@ class EventDateTimeExtension extends Extension
         $email->setData($fakeAttendance);
         $email->addData('Body', $body);
 
-        return $email->send();
+        try {
+            $email->send();
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     public function sendEventConfirmation()

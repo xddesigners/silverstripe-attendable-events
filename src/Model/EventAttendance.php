@@ -403,13 +403,15 @@ class EventAttendance extends DataObject
         $email->setData($this);
         $email->addData('Body', $body);
 
-        if ($email->send()) {
-            $this->EvaluationEmailSent = DBDatetime::now()->getValue();
-            $this->write();
-            return true;
+        try {
+            $email->send();
+        } catch (\Exception $e) {
+            return false;
         }
 
-        return false;
+        $this->EvaluationEmailSent = DBDatetime::now()->getValue();
+        $this->write();
+        return true;
     }
 
     // send when created and if IntakeForm was selected on Event
@@ -477,13 +479,15 @@ class EventAttendance extends DataObject
         $email->setData($this);
         $email->addData('Body', $body);
 
-        if ($email->send()) {
-            $this->IntakeEmailSent = DBDatetime::now()->getValue();
-            $this->write();
-            return true;
+        try {
+            $email->send();
+        } catch (\Exception $e) {
+            return false;
         }
 
-        return false;
+        $this->IntakeEmailSent = DBDatetime::now()->getValue();
+        $this->write();
+        return true;
     }
 
     // send when created
@@ -543,13 +547,15 @@ class EventAttendance extends DataObject
         $email->setData($this);
         $email->addData('Body', $body);
 
-        if ($email->send()) {
-            $this->WaitingListConfirmationEmailSent = DBDatetime::now()->getValue();
-            $this->write();
-            return true;
+        try {
+            $email->send();
+        } catch (\Exception $e) {
+            return false;
         }
 
-        return false;
+        $this->WaitingListConfirmationEmailSent = DBDatetime::now()->getValue();
+        $this->write();
+        return true;
     }
 
     // send when status is set to confirmed and mail has not been send
@@ -608,13 +614,15 @@ class EventAttendance extends DataObject
         $email->setData($this);
         $email->addData('Body', $body);
 
-        if ($email->send()) {
-            $this->EventConfirmationEmailSent = DBDatetime::now()->getValue();
-            $this->write();
-            return true;
+        try {
+            $email->send();
+        } catch (\Exception $e) {
+            return false;
         }
 
-        return false;
+        $this->EventConfirmationEmailSent = DBDatetime::now()->getValue();
+        $this->write();
+        return true;
     }
 
 }
