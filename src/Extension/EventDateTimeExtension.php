@@ -359,7 +359,6 @@ class EventDateTimeExtension extends Extension
 
     public function onBeforeWrite()
     {
-        parent::onBeforeWrite();
         // force change to trigger onAfterWrite()
         $this->owner->LastEdited = DBDatetime::now()->Rfc2822();
         $this->owner->Title = $this->owner->StartDate;
@@ -382,7 +381,6 @@ class EventDateTimeExtension extends Extension
 
     public function onAfterWrite()
     {
-        parent::onAfterWrite();
         $days = $this->owner->DayDateTimes();
         if (!$days->exists() && $this->owner->StartDate) {
             // auto create
