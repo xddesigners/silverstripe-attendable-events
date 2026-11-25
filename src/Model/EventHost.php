@@ -2,7 +2,7 @@
 
 namespace XD\AttendableEvents\Model;
 
-use SilverShop\HasOneField\HasOneButtonField;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Security\Member;
 use XD\Events\Model\EventDateTime;
@@ -41,7 +41,8 @@ class EventHost extends DataObject
 
         $fields->removeByName(['Sort', 'EventDateTimeID', 'MemberID']);
 
-        $field = new HasOneButtonField($this, 'Member');
+        $field = DropdownField::create('MemberID', _t(__CLASS__ . '.Member', 'Member'), Member::get()->map('ID', 'Title')->toArray())
+            ->setEmptyString(_t(__CLASS__ . '.MemberNone', '- none -'));
         $fields->addFieldToTab('Root.Main', $field);
 
         return $fields;

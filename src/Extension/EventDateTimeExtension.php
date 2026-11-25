@@ -4,8 +4,8 @@ namespace XD\AttendableEvents\Extension;
 
 use Exception;
 use LeKoala\ExcelImportExport\ExcelGridFieldExportButton;
-use SilverShop\HasOneField\HasOneButtonField;
 use SilverStripe\Control\Controller;
+use SilverStripe\Forms\DropdownField;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\Forms\CheckboxField;
 use SilverStripe\Forms\CompositeField;
@@ -85,7 +85,8 @@ class EventDateTimeExtension extends Extension
             $fields->addFieldToTab('Root.Main', $daysGrid);
         }
 
-        $locationField = HasOneButtonField::create($this->owner, 'Location', 'LocationID', _t(__CLASS__ . '.Location', 'Location'));
+        $locationField = DropdownField::create('LocationID', _t(__CLASS__ . '.Location', 'Location'), EventLocation::get()->map('ID', 'Title')->toArray())
+            ->setEmptyString(_t(__CLASS__ . '.LocationNone', '- none -'));
 
         $fields->addFieldsToTab('Root.Main', [
             CompositeField::create([

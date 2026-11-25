@@ -1,6 +1,6 @@
 <?php
 
-namespace XD\AttendableEvents\Extensions;
+namespace XD\AttendableEvents\Extension;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\Security\Member;
@@ -8,7 +8,7 @@ use XD\AttendableEvents\Model\EventAttendance;
 
 /**
  * Class MemberExtension
- * @package XD\AttendableEvents\Extensions
+ * @package XD\AttendableEvents\Extension
  * @property Member|MemberExtension $owner
  */
 class MemberExtension extends Extension

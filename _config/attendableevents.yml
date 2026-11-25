@@ -15,7 +15,7 @@ SilverStripe\Forms\GridField\GridFieldDetailForm_ItemRequest:
     - XD\AttendableEvents\Extension\GridFieldDetailFormItemRequestExtension
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
-    - XD\AttendableEvents\Extensions\SiteConfigExtension
+    - XD\AttendableEvents\Extension\SiteConfigExtension
 SilverStripe\Security\Member:
   extensions:
-    - XD\AttendableEvents\Extensions\MemberExtension
+    - XD\AttendableEvents\Extension\MemberExtension

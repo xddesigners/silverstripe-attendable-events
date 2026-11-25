@@ -28,8 +28,6 @@ use XD\AttendableEvents\Extension\EventControllerExtension;
 use XD\AttendableEvents\Extension\EventDateTimeExtension;
 use XD\AttendableEvents\Forms\Fields\AttendField;
 use XD\AttendableEvents\Model\EventAttendance;
-use XD\Basic\Extensions\MemberExtension;
-use XD\Basic\Forms\Fields\AttendMemberDietField;
 use XD\Events\Model\EventDateTime;
 use XD\Events\Model\EventPage;
 use XD\Events\Model\EventPageController;
@@ -205,7 +203,7 @@ class AttendForm extends Form
                 $members->map()->toArray()
             );
         } elseif ($members && $members->first()) {
-            /* @var Member|MemberExtension|\XD\Lea\Extensions\MemberExtension $member */
+            /* @var Member $member */
 
             $member = $members->first();
             $currentUser = Security::getCurrentUser();

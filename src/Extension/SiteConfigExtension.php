@@ -1,6 +1,6 @@
 <?php
 
-namespace XD\AttendableEvents\Extensions;
+namespace XD\AttendableEvents\Extension;
 
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\HTMLEditor\HTMLEditorField;

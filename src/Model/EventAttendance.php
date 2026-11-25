@@ -15,9 +15,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\UserForms\Model\Submission\SubmittedFormField;
 use SilverStripe\Model\ArrayData;
-use VGS\Members\Model\VGSMember;
 use XD\AttendableEvents\Forms\Fields\AttendField;
-use XD\Basic\Forms\Fields\AttendMemberDietField;
 use XD\Events\Model\EventDateTime;
 use XD\Events\Model\EventPage;
 
@@ -126,25 +124,16 @@ class EventAttendance extends DataObject
         $parsed = new ArrayList();
         foreach ($this->Fields() as $attendeeField) {
             $values = json_decode(''.$attendeeField->Value, true);
-            // Field is a diet field
-            if ($attendeeField instanceof AttendMemberDietField) {
-                $value = [];
-                foreach ($values as $memberId => $fieldValue) {
-                    if ($member = Member::get_by_id($memberId)) {
-                        $value[] = "{$member->getName()}: $fieldValue";
-                    } else {
-                        $value[] = $fieldValue;
-                    }
-                }
-
-                $value = implode(', ', $values);
-            } else if (is_array($values)) {
+            if (is_array($values)) {
                 // Field is an multivalue field
                 $value = implode(', ', $values);
             } else {
                 // Field is single value
                 $value = $attendeeField->Value;
             }
+
+            // Hook: let a project reformat a field's parsed value (e.g. a member-keyed diet field).
+            $this->extend('updateParsedFieldValue', $value, $attendeeField, $values);
 
             $parsed->push(new ArrayData([
                 'Title' => $attendeeField->Title,
@@ -295,15 +284,8 @@ class EventAttendance extends DataObject
     public function getAttendeePhone()
     {
         $phone = $this->Phone;
-        if (($member = $this->Member()) && $member->exists()) {
-            if ($member instanceof VGSMember) {
-                return $member->getFunctionPhone() ?? $member->PrivatePhone;
-            }
-
-            // return $member->Telephone ? $member->Telephone : $member->MobilePhone;
-            return '-';
-        }
-
+        // Hook: a project can resolve the phone from the linked member record.
+        $this->extend('updateAttendeePhone', $phone);
         return $phone;
     }
 
@@ -330,22 +312,18 @@ class EventAttendance extends DataObject
 
     public function getAttendeeNumber()
     {
-        if (($member = $this->Member()) && $member->exists() && $member instanceof VGSMember) {
-            return $member->MembershipNumber;
-        }
-
-        return '-';
+        $number = '-';
+        // Hook: a project can resolve a membership number from the linked member record.
+        $this->extend('updateAttendeeNumber', $number);
+        return $number;
     }
 
     public function getAttendeeOrganisation()
     {
-        if (($member = $this->Member()) && $member->exists() && $member instanceof VGSMember) {
-            if( $organisation = $member->getCurrentOrganisation() ){
-                return $organisation->Title;
-            }
-        }
-
-        return $this->Organisation;
+        $organisation = $this->Organisation;
+        // Hook: a project can resolve the organisation from the linked member record.
+        $this->extend('updateAttendeeOrganisation', $organisation);
+        return $organisation;
     }
 
     public function getTitle()
